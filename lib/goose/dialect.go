@@ -57,6 +57,13 @@ func (pg PostgresDialect) dbVersionQuery(db *sql.DB) (*sql.Rows, error) {
 		return nil, ErrTableDoesNotExist
 	}
 
+	// Postgres does not seem to always return an error.  Check
+	// to make sure that we have columns in our result set.
+	columns, err := rows.Columns()
+	if len(columns) == 0 {
+		return nil, ErrTableDoesNotExist
+	}
+
 	return rows, err
 }
 
