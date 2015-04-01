@@ -35,7 +35,7 @@ func createRun(cmd *Command, args ...string) {
 		log.Fatal(err)
 	}
 
-	n, err := goose.CreateMigration(args[0], migrationType, conf.MigrationsDir, time.Now())
+	n, err := goose.CreateMigration(args[0], migrationType, conf.MigrationsDir, time.Now().UTC())
 	if err != nil {
 		log.Fatal(err)
 	}
