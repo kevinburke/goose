@@ -50,7 +50,7 @@ Use the `pgschema` flag with the `up` command specify a postgres schema.
     $ goose: migrating db environment 'development', current version: 0, target: 3
     $ OK    001_basics.sql
     $ OK    002_next.sql
-    $ OK    003_and_again.go
+    $ OK    003_and_again.sql
 
 ## down
 
@@ -58,7 +58,7 @@ Roll back a single migration from the current version.
 
     $ goose down
     $ goose: migrating db environment 'development', current version: 3, target: 2
-    $ OK    003_and_again.go
+    $ OK    003_and_again.sql
 
 ## redo
 
@@ -66,9 +66,9 @@ Roll back the most recently applied migration, then run it again.
 
     $ goose redo
     $ goose: migrating db environment 'development', current version: 3, target: 2
-    $ OK    003_and_again.go
+    $ OK    003_and_again.sql
     $ goose: migrating db environment 'development', current version: 2, target: 3
-    $ OK    003_and_again.go
+    $ OK    003_and_again.sql
 
 ## status
 
@@ -80,7 +80,7 @@ Print the status of all migrations:
     $   =======================================
     $   Sun Jan  6 11:25:03 2013 -- 001_basics.sql
     $   Sun Jan  6 11:25:03 2013 -- 002_next.sql
-    $   Pending                  -- 003_and_again.go
+    $   Pending                  -- 003_and_again.sql
 
 ## dbversion
 
@@ -95,7 +95,8 @@ Print the current version of the database:
 
 # Migrations
 
-goose supports migrations written in SQL or in Go - see the `goose create` command above for details on how to generate them.
+goose supports migrations written in SQL - see the `goose create` command above
+for details on how to generate them.
 
 ## SQL Migrations
 
@@ -146,34 +147,6 @@ language plpgsql;
 -- +goose StatementEnd
 ```
 
-## Go Migrations
-
-A sample Go migration looks like:
-
-```go
-package main
-
-import (
-    "database/sql"
-    "fmt"
-)
-
-func Up_20130106222315(txn *sql.Tx) {
-    fmt.Println("Hello from migration 20130106222315 Up!")
-}
-
-func Down_20130106222315(txn *sql.Tx) {
-    fmt.Println("Hello from migration 20130106222315 Down!")
-}
-```
-
-`Up_20130106222315()` will be executed as part of a forward migration, and `Down_20130106222315()` will be executed as part of a rollback.
-
-The numeric portion of the function name (`20130106222315`) must be the leading portion of migration's filename, such as `20130106222315_descriptive_name.go`. `goose create` does this by default.
-
-A transaction is provided, rather than the DB instance directly, since goose also needs to record the schema version within the same transaction. Each migration should run as a single transaction to ensure DB integrity, so it's good practice anyway.
-
-
 # Configuration
 
 goose expects you to maintain a folder (typically called "db"), which contains the following:
@@ -197,22 +170,12 @@ You may include as many environments as you like, and you can use the `-env` com
 
 goose will expand environment variables in the `open` element. For an example, see the Heroku section below.
 
-## Other Drivers
-goose knows about some common SQL drivers, but it can still be used to run Go-based migrations with any driver supported by `database/sql`. An import path and known dialect are required.
+## Database Drivers
 
-Currently, available dialects are: "postgres", "mysql", or "sqlite3"
+Currently, available dialects are: "postgres", "mysql", or "sqlite3".
 
-To run Go-based migrations with another driver, specify its import path and dialect, as shown below.
-
-```yml
-customdriver:
-    driver: custom
-    open: custom open string
-    import: github.com/custom/driver
-    dialect: mysql
-```
-
-NOTE: Because migrations written in SQL are executed directly by the goose binary, only drivers compiled into goose may be used for these migrations.
+Because migrations written in SQL are executed directly by the goose binary,
+only drivers compiled into goose may be used for these migrations.
 
 ## Using goose with Heroku
 
