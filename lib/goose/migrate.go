@@ -86,8 +86,6 @@ func RunMigrationsOnDb(conf *DBConf, migrationsDir string, target int64, db *sql
 	for _, m := range ms {
 
 		switch filepath.Ext(m.Source) {
-		case ".go":
-			err = runGoMigration(conf, m.Source, m.Version, direction)
 		case ".sql":
 			err = runSQLMigration(conf, db, m.Source, m.Version, direction)
 		}
@@ -173,7 +171,7 @@ func NumericComponent(name string) (int64, error) {
 
 	base := filepath.Base(name)
 
-	if ext := filepath.Ext(base); ext != ".go" && ext != ".sql" {
+	if ext := filepath.Ext(base); ext != ".sql" {
 		return 0, errors.New("not a recognized migration file type")
 	}
 
@@ -349,8 +347,8 @@ func GetMostRecentDBVersion(dirpath string) (version int64, err error) {
 
 func CreateMigration(name, migrationType, dir string, t time.Time) (path string, err error) {
 
-	if migrationType != "go" && migrationType != "sql" {
-		return "", errors.New("migration type must be 'go' or 'sql'")
+	if migrationType != "sql" {
+		return "", errors.New("migration type must be 'sql'")
 	}
 
 	timestamp := t.Format("20060102150405")
@@ -361,8 +359,6 @@ func CreateMigration(name, migrationType, dir string, t time.Time) (path string,
 	var tmpl *template.Template
 	if migrationType == "sql" {
 		tmpl = sqlMigrationTemplate
-	} else {
-		tmpl = goMigrationTemplate
 	}
 
 	path, err = writeTemplateToFile(fpath, tmpl, timestamp)
@@ -383,24 +379,6 @@ func FinalizeMigration(conf *DBConf, txn *sql.Tx, direction bool, v int64) error
 
 	return txn.Commit()
 }
-
-var goMigrationTemplate = template.Must(template.New("goose.go-migration").Parse(`
-package main
-
-import (
-	"database/sql"
-)
-
-// Up is executed when this migration is applied
-func Up_{{ . }}(txn *sql.Tx) {
-
-}
-
-// Down is executed when this migration is rolled back
-func Down_{{ . }}(txn *sql.Tx) {
-
-}
-`))
 
 var sqlMigrationTemplate = template.Must(template.New("goose.sql-migration").Parse(`
 -- +goose Up

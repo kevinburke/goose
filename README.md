@@ -1,6 +1,7 @@
 # goose
 
-This is a fork of bitbucket.org/liamstask/goose.
+This is a fork of bitbucket.org/liamstask/goose that attempts to implement
+several new features, and removes support for the Go migration mode.
 
 goose is a database migration tool.
 
@@ -8,11 +9,13 @@ You can manage your database's evolution by creating incremental SQL scripts.
 
 # Install
 
-    $ go get -u github.com/kevinburke/goose/cmd/goose
+    $ make install
 
 This will install the `goose` binary to your `$GOPATH/bin` directory.
 
-You can also build goose into your own applications by importing `bitbucket.org/liamstask/goose/lib/goose`. Documentation is available at [godoc.org](http://godoc.org/bitbucket.org/liamstask/goose/lib/goose).
+You can also build goose into your own applications by importing
+`github.com/kevinburke/goose/lib/goose`. Documentation is available at
+[godoc.org](http://godoc.org/github.com/kevinburke/goose/lib/goose).
 
 NOTE: the API is still new, and may undergo some changes.
 
@@ -222,7 +225,7 @@ These instructions assume that you're using [Keith Rarick's Heroku Go buildpack]
 // note: need at least one blank line after build constraint
 package main
 
-import _ "bitbucket.org/liamstask/goose/cmd/goose"
+import _ "github.com/kevinburke/goose/cmd/goose"
 ```
 
 [Set up your Heroku database(s) as usual.](https://devcenter.heroku.com/articles/heroku-postgresql)
