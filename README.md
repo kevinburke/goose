@@ -1,14 +1,14 @@
 # goose
 
+This is a fork of bitbucket.org/liamstask/goose.
+
 goose is a database migration tool.
 
-You can manage your database's evolution by creating incremental SQL or Go scripts.
-
-[![Build Status](https://drone.io/bitbucket.org/liamstask/goose/status.png)](https://drone.io/bitbucket.org/liamstask/goose/latest)
+You can manage your database's evolution by creating incremental SQL scripts.
 
 # Install
 
-    $ go get bitbucket.org/liamstask/goose/cmd/goose
+    $ go get -u github.com/kevinburke/goose/cmd/goose
 
 This will install the `goose` binary to your `$GOPATH/bin` directory.
 
@@ -22,17 +22,12 @@ goose provides several commands to help manage your database schema.
 
 ## create
 
-Create a new Go migration.
-
-    $ goose create AddSomeColumns
-    $ goose: created db/migrations/20130106093224_AddSomeColumns.go
-
-Edit the newly created script to define the behavior of your migration.
-
-You can also create an SQL migration:
+Create a SQL migration:
 
     $ goose create AddSomeColumns sql
     $ goose: created db/migrations/20130106093224_AddSomeColumns.sql
+
+Edit the newly created script to define the behavior of your migration.
 
 ## up
 
@@ -42,7 +37,7 @@ Apply all available migrations.
     $ goose: migrating db environment 'development', current version: 0, target: 3
     $ OK    001_basics.sql
     $ OK    002_next.sql
-    $ OK    003_and_again.go
+    $ OK    003_and_again.sql
 
 ### option: pgschema
 
