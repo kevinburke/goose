@@ -1,7 +1,7 @@
 .PHONY: install test clean release
 
 install:
-	go get -u github.com/kevinburke/goose/cmd/goose
+	go get github.com/kevinburke/goose/cmd/goose
 
 test:
 	go test ./...
