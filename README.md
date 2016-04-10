@@ -27,7 +27,7 @@ goose provides several commands to help manage your database schema.
 
 Create a SQL migration:
 
-    $ goose create AddSomeColumns sql
+    $ goose create AddSomeColumns
     $ goose: created db/migrations/20130106093224_AddSomeColumns.sql
 
 Edit the newly created script to define the behavior of your migration.
