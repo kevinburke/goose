@@ -31,15 +31,15 @@ var commands = []*Command{
 }
 
 var versionCmd = &Command{
-	Name:  "version",
-	Usage: "Print the goose version",
-	Run:   versionRun,
-	Help:  "Print the goose version",
-	Flag:  *flag.NewFlagSet("version", flag.ExitOnError),
+	Name:	"version",
+	Usage:	"Print the goose version",
+	Run:	versionRun,
+	Help:	"Print the goose version",
+	Flag:	*flag.NewFlagSet("version", flag.ExitOnError),
 }
 
 // Bump this by running "make release"
-const VERSION = "1.0"
+const VERSION = "1.1"
 
 func versionRun(cmd *Command, args ...string) {
 	fmt.Fprintf(os.Stderr, "goose version %s\n", VERSION)
