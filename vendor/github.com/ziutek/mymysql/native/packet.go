@@ -2,7 +2,7 @@ package native
 
 import (
 	"bufio"
-	"github.com/kevinburke/goose/Godeps/_workspace/src/github.com/ziutek/mymysql/mysql"
+	"github.com/ziutek/mymysql/mysql"
 	"io"
 	"io/ioutil"
 )

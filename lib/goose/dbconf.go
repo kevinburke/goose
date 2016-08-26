@@ -7,8 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/kevinburke/goose/Godeps/_workspace/src/github.com/kylelemons/go-gypsy/yaml"
-	"github.com/kevinburke/goose/Godeps/_workspace/src/github.com/lib/pq"
+	"github.com/kylelemons/go-gypsy/yaml"
+	"github.com/lib/pq"
 )
 
 // DBDriver encapsulates the info needed to work with

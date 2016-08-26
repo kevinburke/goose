@@ -1,7 +1,7 @@
 {
 	"ImportPath": "github.com/kevinburke/goose",
-	"GoVersion": "devel-81a8f1a",
-	"GodepVersion": "v72",
+	"GoVersion": "go1.7",
+	"GodepVersion": "v74",
 	"Packages": [
 		"./..."
 	],

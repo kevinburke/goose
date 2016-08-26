@@ -6,8 +6,8 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
-	"github.com/kevinburke/goose/Godeps/_workspace/src/github.com/ziutek/mymysql/mysql"
-	"github.com/kevinburke/goose/Godeps/_workspace/src/github.com/ziutek/mymysql/native"
+	"github.com/ziutek/mymysql/mysql"
+	"github.com/ziutek/mymysql/native"
 	"io"
 	"net"
 	"strconv"
@@ -430,4 +430,4 @@ func Version() string {
 // server to time.Time.
 func SetLocation(loc *time.Location) {
 	location = loc
-}
+} 
