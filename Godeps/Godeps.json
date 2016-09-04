@@ -12,9 +12,9 @@
 			"Rev": "267b128680c46286b9ca13475c3cca5de8f79bd7"
 		},
 		{
-			"ImportPath": "github.com/kylelemons/go-gypsy/yaml",
-			"Comment": "go.weekly.2011-11-02-19-g42fc2c7",
-			"Rev": "42fc2c7ee9b8bd0ff636cd2d7a8c0a49491044c5"
+			"ImportPath": "github.com/kevinburke/go-gypsy/yaml",
+			"Comment": "go.weekly.2011-11-02-21-gc2f2622",
+			"Rev": "c2f2622a43768558628918d6ae5520007b098716"
 		},
 		{
 			"ImportPath": "github.com/lib/pq",

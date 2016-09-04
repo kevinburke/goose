@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Fork of github.com/kylelemons/go-gypsy that fixes Vet
+
 // Gypsy is a simplified YAML parser written in Go.  It is intended to be used as
 // a simple configuration file, and as such does not support a lot of the more
 // nuanced syntaxes allowed in full-fledged YAML.  YAML does not allow indent with

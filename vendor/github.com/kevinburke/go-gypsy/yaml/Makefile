@@ -1,6 +1,6 @@
 include $(GOROOT)/src/Make.inc
 
-TARG=github.com/kylelemons/go-gypsy/yaml
+TARG=github.com/kevinburke/go-gypsy/yaml
 GOFILES=\
 	types.go\
 	parser.go\

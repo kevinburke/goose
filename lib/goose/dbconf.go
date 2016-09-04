@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/kylelemons/go-gypsy/yaml"
+	"github.com/kevinburke/go-gypsy/yaml"
 	"github.com/lib/pq"
 )
 
