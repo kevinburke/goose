@@ -177,33 +177,10 @@ Currently, available dialects are: "postgres", "mysql", or "sqlite3".
 Because migrations written in SQL are executed directly by the goose binary,
 only drivers compiled into goose may be used for these migrations.
 
-## Using goose with Heroku
+## Limitations
 
-These instructions assume that you're using [Keith Rarick's Heroku Go buildpack](https://github.com/kr/heroku-buildpack-go). First, add a file to your project called (e.g.) `install_goose.go` to trigger building of the goose executable during deployment, with these contents:
-
-```go
-// use build constraints to work around http://code.google.com/p/go/issues/detail?id=4210
-// +build heroku
-
-// note: need at least one blank line after build constraint
-package main
-
-import _ "github.com/kevinburke/goose/cmd/goose"
-```
-
-[Set up your Heroku database(s) as usual.](https://devcenter.heroku.com/articles/heroku-postgresql)
-
-Then make use of environment variable expansion in your `dbconf.yml`:
-
-```yml
-production:
-    driver: postgres
-    open: $DATABASE_URL
-```
-
-To run goose in production, use `heroku run`:
-
-    heroku run goose -env production up
+You can't run ALTER TYPE or CREATE INDEX CONCURRENTLY inside of a transaction
+(Goose starts a transaction before running migrations).
 
 # Contributors
 
