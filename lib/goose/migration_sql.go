@@ -32,6 +32,27 @@ func endsWithSemicolon(line string) bool {
 	return strings.HasSuffix(prev, ";")
 }
 
+func cannotRunInTransaction(query string) bool {
+	upQuery := strings.TrimSpace(strings.ToUpper(query))
+	lines := strings.Split(upQuery, "\n")
+	for i, line := range lines {
+		trimLine := strings.TrimSpace(line)
+		if trimLine == "" || strings.HasPrefix(trimLine, "--") {
+			if i+1 > len(lines) {
+				// every line is a comment
+				return false
+			}
+			upQuery = strings.TrimSpace(strings.Join(lines[i+1:], "\n"))
+		} else {
+			break
+		}
+	}
+	// There are probably more potential cases here.
+	return strings.HasPrefix(upQuery, "CREATE INDEX CONCURRENTLY ") ||
+		strings.HasPrefix(upQuery, "CREATE UNIQUE INDEX CONCURRENTLY ") ||
+		(strings.HasPrefix(upQuery, "ALTER TYPE ") && strings.Contains(upQuery, " ADD "))
+}
+
 // Split the given sql script into individual statements.
 //
 // The base case is to simply split on semicolons, as these
@@ -137,11 +158,6 @@ func splitSQLStatements(r io.Reader, direction bool) (stmts []string) {
 // until another direction directive is found.
 func runSQLMigration(conf *DBConf, db *sql.DB, scriptFile string, v int64, direction bool) error {
 
-	txn, err := db.Begin()
-	if err != nil {
-		log.Fatal("db.Begin:", err)
-	}
-
 	f, err := os.Open(scriptFile)
 	if err != nil {
 		log.Fatal(err)
@@ -152,7 +168,38 @@ func runSQLMigration(conf *DBConf, db *sql.DB, scriptFile string, v int64, direc
 	// Commits the transaction if successfully applied each statement and
 	// records the version into the version table or returns an error and
 	// rolls back the transaction.
-	for _, query := range splitSQLStatements(f, direction) {
+	stmts := splitSQLStatements(f, direction)
+
+	// Choose query strategy
+	singleQueryOutsideTxn := false
+	for _, query := range stmts {
+		if cannotRunInTransaction(query) {
+			if len(stmts) > 1 {
+				log.Fatalf("Query %s cannot run in a transaction, but was paired with other queries; run it in isolation", query)
+			} else {
+				singleQueryOutsideTxn = true
+			}
+		}
+	}
+
+	if singleQueryOutsideTxn {
+		if _, err = db.Exec(stmts[0]); err != nil {
+			log.Fatalf("FAIL %s (%v), quitting migration.", filepath.Base(scriptFile), err)
+			return err
+		}
+		stmt := conf.Driver.Dialect.insertVersionSql()
+		if _, err := db.Exec(stmt, v, direction); err != nil {
+			log.Printf("WARNING: Executed single query %s but could not commit the version bump %s; error was %s\n", stmts[0], stmt, err.Error())
+		}
+		return err
+	}
+
+	txn, err := db.Begin()
+	if err != nil {
+		log.Fatal("db.Begin:", err)
+	}
+
+	for _, query := range stmts {
 		if _, err = txn.Exec(query); err != nil {
 			txn.Rollback()
 			log.Fatalf("FAIL %s (%v), quitting migration.", filepath.Base(scriptFile), err)
@@ -160,9 +207,13 @@ func runSQLMigration(conf *DBConf, db *sql.DB, scriptFile string, v int64, direc
 		}
 	}
 
-	if err = FinalizeMigration(conf, txn, direction, v); err != nil {
-		log.Fatalf("error finalizing migration %s, quitting. (%v)", filepath.Base(scriptFile), err)
+	// Update the version table for the given migration,
+	// and finalize the transaction.
+	// XXX: drop goose_db_version table on some minimum version number?
+	stmt := conf.Driver.Dialect.insertVersionSql()
+	if _, err := txn.Exec(stmt, v, direction); err != nil {
+		txn.Rollback()
+		return err
 	}
-
-	return nil
+	return txn.Commit()
 }

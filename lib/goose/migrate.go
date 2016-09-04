@@ -366,20 +366,6 @@ func CreateMigration(name, migrationType, dir string, t time.Time) (path string,
 	return
 }
 
-// Update the version table for the given migration,
-// and finalize the transaction.
-func FinalizeMigration(conf *DBConf, txn *sql.Tx, direction bool, v int64) error {
-
-	// XXX: drop goose_db_version table on some minimum version number?
-	stmt := conf.Driver.Dialect.insertVersionSql()
-	if _, err := txn.Exec(stmt, v, direction); err != nil {
-		txn.Rollback()
-		return err
-	}
-
-	return txn.Commit()
-}
-
 var sqlMigrationTemplate = template.Must(template.New("goose.sql-migration").Parse(`
 -- +goose Up
 -- SQL in section 'Up' is executed when this migration is applied
@@ -387,5 +373,4 @@ var sqlMigrationTemplate = template.Must(template.New("goose.sql-migration").Par
 
 -- +goose Down
 -- SQL section 'Down' is executed when this migration is rolled back
-
 `))

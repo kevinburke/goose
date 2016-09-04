@@ -5,6 +5,44 @@ import (
 	"testing"
 )
 
+var txnTests = []struct {
+	in       string
+	expected bool
+}{
+	{"SELECT 1", false},
+	{`-- SELECT 1
+	INSERT INTO foo`, false},
+	{`
+     
+
+create index concurrently idx_name on accounts(foo)
+-- 
+
+`, true},
+	{`
+	-- create index concurrently idx_name on accounts(foo)
+	select 1
+	-- create index concurrently idx_name on accounts(foo)
+	`, false},
+	{`        -- select 1
+	-- select 1
+	create index concurrently idx_name on accounts(foo)
+	`, true},
+	{`create index idx_name on accounts(foo)`, false},
+	{`create unique index concurrently idx_name on accounts(foo)`, true},
+	{`alter type language add value if not exists`, true},
+	{`alter type language rename to foo`, false},
+}
+
+func TestCannotRunInTransaction(t *testing.T) {
+	for _, tt := range txnTests {
+		out := cannotRunInTransaction(tt.in)
+		if out != tt.expected {
+			t.Errorf("cannotRunInTransaction(%v): got %t, want %t", tt.in, out, tt.expected)
+		}
+	}
+}
+
 func TestSemicolons(t *testing.T) {
 
 	type testData struct {

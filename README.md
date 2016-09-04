@@ -177,10 +177,14 @@ Currently, available dialects are: "postgres", "mysql", or "sqlite3".
 Because migrations written in SQL are executed directly by the goose binary,
 only drivers compiled into goose may be used for these migrations.
 
-## Limitations
+## Queries that require a transaction
 
-You can't run ALTER TYPE or CREATE INDEX CONCURRENTLY inside of a transaction
-(Goose starts a transaction before running migrations).
+Some Postgres migrations (CREATE INDEX CONCURRENTLY, ALTER TYPE) cannot be run
+in a transaction. `goose` has a special mode that can detect these queries and
+run them outside of a transaction. To avoid partially-applied transactions,
+we require that these can't-run-in-transaction queries consist of a single
+statement per up/down block, e.g. you can't do `ALTER TYPE ...; ALTER TYPE
+...;`.
 
 # Contributors
 
