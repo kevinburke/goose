@@ -6,13 +6,14 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
-	"github.com/ziutek/mymysql/mysql"
-	"github.com/ziutek/mymysql/native"
 	"io"
 	"net"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/ziutek/mymysql/mysql"
+	"github.com/ziutek/mymysql/native"
 )
 
 type conn struct {
@@ -83,7 +84,7 @@ func (c conn) parseQuery(query string, args []driver.Value) (string, error) {
 		case float64:
 			s = strconv.FormatFloat(v, 'e', 12, 64)
 		default:
-			panic(fmt.Sprintf("%v (%T) can't be handled by godrv"))
+			panic(fmt.Sprintf("%v (%T) can't be handled by godrv", v, v))
 		}
 		q[n] = query[:i]
 		q[n+1] = s
@@ -188,6 +189,9 @@ func (t tx) Rollback() (err error) {
 }
 
 func (s *stmt) Close() (err error) {
+	if s.my == nil {
+		panic("godrv: stmt closed twice")
+	}
 	err = s.my.Delete()
 	s.my = nil
 	if err != nil {
@@ -390,7 +394,7 @@ func (d *Driver) Open(uri string) (driver.Conn, error) {
 // Register registers initialisation commands.
 // This is workaround, see http://codereview.appspot.com/5706047
 func (drv *Driver) Register(query string) {
-	drv.initCmds = append(d.initCmds, query)
+	drv.initCmds = append(drv.initCmds, query)
 }
 
 // Dialer can be used to dial connections to MySQL. If Dialer returns (nil, nil)
@@ -404,21 +408,21 @@ func (drv *Driver) SetDialer(dialer Dialer) {
 }
 
 // Driver automatically registered in database/sql
-var d = Driver{proto: "tcp", raddr: "127.0.0.1:3306"}
+var dfltdrv = Driver{proto: "tcp", raddr: "127.0.0.1:3306"}
 
 // Register calls Register method on driver registered in database/sql
 func Register(query string) {
-	d.Register(query)
+	dfltdrv.Register(query)
 }
 
 // SetDialer calls SetDialer method on driver registered in database/sql
 func SetDialer(dialer Dialer) {
-	d.SetDialer(dialer)
+	dfltdrv.SetDialer(dialer)
 }
 
 func init() {
 	Register("SET NAMES utf8")
-	sql.Register("mymysql", &d)
+	sql.Register("mymysql", &dfltdrv)
 }
 
 // Version returns mymysql version string
@@ -430,4 +434,4 @@ func Version() string {
 // server to time.Time.
 func SetLocation(loc *time.Location) {
 	location = loc
-} 
+}
