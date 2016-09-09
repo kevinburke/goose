@@ -33,18 +33,18 @@
 		},
 		{
 			"ImportPath": "github.com/ziutek/mymysql/godrv",
-			"Comment": "v1.5.4-16-g6b5b2c4",
-			"Rev": "6b5b2c401cfbd75e2a8fa2b1a916f36ba8ecdb68"
+			"Comment": "v1.5.4-17-gdf6241f",
+			"Rev": "df6241f6355c5595d99e9661039f8648c440deba"
 		},
 		{
 			"ImportPath": "github.com/ziutek/mymysql/mysql",
-			"Comment": "v1.5.4-16-g6b5b2c4",
-			"Rev": "6b5b2c401cfbd75e2a8fa2b1a916f36ba8ecdb68"
+			"Comment": "v1.5.4-17-gdf6241f",
+			"Rev": "df6241f6355c5595d99e9661039f8648c440deba"
 		},
 		{
 			"ImportPath": "github.com/ziutek/mymysql/native",
-			"Comment": "v1.5.4-16-g6b5b2c4",
-			"Rev": "6b5b2c401cfbd75e2a8fa2b1a916f36ba8ecdb68"
+			"Comment": "v1.5.4-17-gdf6241f",
+			"Rev": "df6241f6355c5595d99e9661039f8648c440deba"
 		}
 	]
 }
