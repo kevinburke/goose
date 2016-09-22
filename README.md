@@ -1,7 +1,14 @@
 # goose
 
-This is a fork of bitbucket.org/liamstask/goose that attempts to implement
-several new features, and removes support for the Go migration mode.
+This is a fork of bitbucket.org/liamstask/goose that implements several new
+features:
+
+- Support for db queries that cannot be run in a transaction (CREATE INDEX
+  CONCURRENTLY, ALTER TYPE)
+- Explicit versions/tags
+- Dependency vendoring
+
+I removed support for the Go migration mode.
 
 goose is a database migration tool.
 
