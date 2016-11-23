@@ -1,7 +1,7 @@
 {
 	"ImportPath": "github.com/kevinburke/goose",
 	"GoVersion": "go1.7",
-	"GodepVersion": "v74",
+	"GodepVersion": "v75",
 	"Packages": [
 		"./..."
 	],
@@ -18,13 +18,13 @@
 		},
 		{
 			"ImportPath": "github.com/lib/pq",
-			"Comment": "go1.0-cutoff-117-g50761b0",
-			"Rev": "50761b0867bd1d9d069276790bcd4a3bccf2324a"
+			"Comment": "go1.0-cutoff-127-gd8eeeb8",
+			"Rev": "d8eeeb8bae8896dd8e1b7e514ab0d396c4f12a1b"
 		},
 		{
 			"ImportPath": "github.com/lib/pq/oid",
-			"Comment": "go1.0-cutoff-117-g50761b0",
-			"Rev": "50761b0867bd1d9d069276790bcd4a3bccf2324a"
+			"Comment": "go1.0-cutoff-127-gd8eeeb8",
+			"Rev": "d8eeeb8bae8896dd8e1b7e514ab0d396c4f12a1b"
 		},
 		{
 			"ImportPath": "github.com/mattn/go-sqlite3",
@@ -33,18 +33,18 @@
 		},
 		{
 			"ImportPath": "github.com/ziutek/mymysql/godrv",
-			"Comment": "v1.5.4-17-gdf6241f",
-			"Rev": "df6241f6355c5595d99e9661039f8648c440deba"
+			"Comment": "v1.5.4-18-gec91923",
+			"Rev": "ec91923df2e4a5057370a565cef827bd62e665af"
 		},
 		{
 			"ImportPath": "github.com/ziutek/mymysql/mysql",
-			"Comment": "v1.5.4-17-gdf6241f",
-			"Rev": "df6241f6355c5595d99e9661039f8648c440deba"
+			"Comment": "v1.5.4-18-gec91923",
+			"Rev": "ec91923df2e4a5057370a565cef827bd62e665af"
 		},
 		{
 			"ImportPath": "github.com/ziutek/mymysql/native",
-			"Comment": "v1.5.4-17-gdf6241f",
-			"Rev": "df6241f6355c5595d99e9661039f8648c440deba"
+			"Comment": "v1.5.4-18-gec91923",
+			"Rev": "ec91923df2e4a5057370a565cef827bd62e665af"
 		}
 	]
 }
