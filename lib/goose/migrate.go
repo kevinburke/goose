@@ -366,8 +366,8 @@ func CreateMigration(name, migrationType, dir string, t time.Time) (path string,
 	return
 }
 
-var sqlMigrationTemplate = template.Must(template.New("goose.sql-migration").Parse(`
--- +goose Up
+var sqlMigrationTemplate = template.Must(template.New("goose.sql-migration").Parse(
+	`-- +goose Up
 -- SQL in section 'Up' is executed when this migration is applied
 
 
