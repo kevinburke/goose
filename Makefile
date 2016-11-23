@@ -1,3 +1,5 @@
+SHELL = /bin/bash
+
 .PHONY: install test clean release
 
 STATICCHECK := $(shell command -v staticcheck)
@@ -7,7 +9,7 @@ test: vet
 	go test ./...
 
 install:
-	go get github.com/kevinburke/goose/cmd/goose
+	go get -v github.com/kevinburke/goose/...
 
 vet:
 ifndef STATICCHECK
@@ -17,7 +19,7 @@ endif
 	staticcheck ./cmd/... ./lib/...
 
 race-test: vet
-	go test -race ./...
+	go test -v -race ./...
 
 release: race-test
 ifndef BUMP_VERSION

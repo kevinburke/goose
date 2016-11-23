@@ -66,6 +66,4 @@ func validateMigrationSort(t *testing.T, ms migrationSorter, sorted []int64) {
 			t.Errorf("mismatched Previous v: %v, got %v, wanted %v\n", m, m.Previous, prev)
 		}
 	}
-
-	t.Log(ms)
 }

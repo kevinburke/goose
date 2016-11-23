@@ -1,15 +1,17 @@
+go_import_path: github.com/kevinburke/goose
+
 language: go
 
 go:
   - tip
+  - 1.7
   - 1.6
   - 1.5
-  - 1.4
 
 install:
-  - make
+  - make install
 
 script:
-  - make test
+  - make race-test
 
 sudo: false
