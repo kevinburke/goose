@@ -39,7 +39,7 @@ var versionCmd = &Command{
 }
 
 // Bump this by running "make release"
-const VERSION = "1.4"
+const VERSION = "1.5"
 
 func versionRun(cmd *Command, args ...string) {
 	fmt.Fprintf(os.Stderr, "goose version %s\n", VERSION)
