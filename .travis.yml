@@ -3,9 +3,9 @@ go_import_path: github.com/kevinburke/goose
 language: go
 
 go:
-  - tip
   - 1.7
-  - 1.6
+  - 1.8
+  - tip
 
 install:
   - make install
