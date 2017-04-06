@@ -13,7 +13,7 @@ install:
 
 vet:
 ifndef STATICCHECK
-	go get -u github.com/dominikh/go-tools/cmd/staticcheck
+	go get -u honnef.co/go/tools/cmd/staticcheck
 endif
 	go vet ./cmd/... ./lib/...
 	staticcheck ./cmd/... ./lib/...
