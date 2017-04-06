@@ -3,7 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 	"text/template"
 
@@ -28,25 +30,77 @@ var commands = []*Command{
 	createCmd,
 	dbVersionCmd,
 	versionCmd,
+	helpCmd,
+	initCmd,
 }
 
 var versionCmd = &Command{
-	Name:  "version",
-	Usage: "Print the goose version",
-	Run:   versionRun,
-	Help:  "Print the goose version",
-	Flag:  *flag.NewFlagSet("version", flag.ExitOnError),
+	Name:    "version",
+	Usage:   "Print the goose version",
+	Summary: "Print the current version of the goose tool",
+	Run:     versionRun,
+	Help:    "Print the goose version",
+	Flag:    *flag.NewFlagSet("version", flag.ExitOnError),
 }
 
-// Bump this by running "make release"
-const VERSION = "1.5"
+var helpCmd = &Command{
+	Name:    "help",
+	Usage:   "Print the help text",
+	Summary: "Print the help text",
+	Run:     helpRun,
+	Help:    "Print the help text",
+	Flag:    *flag.NewFlagSet("help", flag.ExitOnError),
+}
 
-func versionRun(cmd *Command, args ...string) {
+var initCmd = &Command{
+	Name:    "init",
+	Usage:   "Create the scaffolding",
+	Summary: "Create the migration scaffolding",
+	Run:     initRun,
+}
+
+var dbConfTpl = []byte(`# Database configuration file.
+#
+# Example configurations (uncomment and modify as you see fit):
+#
+# development:
+#     driver: postgres
+#     open: user=mypguser dbname=mydatabase sslmode=disable
+#
+# cluster:
+#     driver: mysql
+#     open: $DATABASE_URL
+`)
+
+func initRun(*Command, ...string) {
+	wd, err := os.Getwd()
+	if err != nil {
+		os.Stderr.WriteString(err.Error())
+		os.Exit(2)
+	}
+	dbDir := filepath.Join(wd, "db")
+	os.Mkdir(dbDir, 0700)
+	conf := filepath.Join(dbDir, "dbconf.yml")
+	if _, err := os.Stat(conf); os.IsNotExist(err) {
+		if err := ioutil.WriteFile(conf, dbConfTpl, 0600); err != nil {
+			os.Stderr.WriteString(err.Error())
+			os.Exit(2)
+		}
+	}
+}
+
+func helpRun(*Command, ...string) {
+	flag.Usage()
+}
+
+// The version of the goose tool.
+const VERSION = "1.5" // Bump this by running "make release".
+
+func versionRun(*Command, ...string) {
 	fmt.Fprintf(os.Stderr, "goose version %s\n", VERSION)
 }
 
 func main() {
-
 	flag.Usage = usage
 	flag.Parse()
 
@@ -80,8 +134,7 @@ func usage() {
 	usageTmpl.Execute(os.Stdout, commands)
 }
 
-var usagePrefix = `
-goose is a database migration management system for Go projects.
+var usagePrefix = `goose is a database migration management system for Go projects.
 
 Usage:
     goose [options] <subcommand> [subcommand options]
