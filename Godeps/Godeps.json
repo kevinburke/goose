@@ -28,8 +28,8 @@
 		},
 		{
 			"ImportPath": "github.com/mattn/go-sqlite3",
-			"Comment": "v1.2.0-3-g8ecd77c",
-			"Rev": "8ecd77c707d698b39fbcf76e4e8d08f284c8307f"
+			"Comment": "v1.2.0-80-gcf7286f",
+			"Rev": "cf7286f069c3ef596efcc87781a4653a2e7607bd"
 		},
 		{
 			"ImportPath": "github.com/ziutek/mymysql/godrv",

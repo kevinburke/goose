@@ -7,6 +7,10 @@ features:
   CONCURRENTLY, ALTER TYPE)
 - Explicit versions/tags
 - Dependency vendoring
+- Updated versions of dependencies; fixes [a sqlite3 warning][warning] on the
+latest version of Macs.
+
+[warning]: https://github.com/mattn/go-sqlite3/issues/336
 
 I removed support for the Go migration mode.
 
