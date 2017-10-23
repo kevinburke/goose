@@ -18,11 +18,6 @@ var statusCmd = &Command{
 	Run:     statusRun,
 }
 
-type StatusData struct {
-	Source string
-	Status string
-}
-
 func statusRun(cmd *Command, args ...string) {
 
 	conf, err := dbConfFromFlags()

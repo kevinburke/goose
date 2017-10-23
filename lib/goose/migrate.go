@@ -91,7 +91,7 @@ func RunMigrationsOnDb(conf *DBConf, migrationsDir string, target int64, db *sql
 		}
 
 		if err != nil {
-			return errors.New(fmt.Sprintf("FAIL %v, quitting migration", err))
+			return fmt.Errorf("FAIL %v, quitting migration", err)
 		}
 
 		fmt.Println("OK   ", filepath.Base(m.Source))

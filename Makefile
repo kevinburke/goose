@@ -1,25 +1,25 @@
-SHELL = /bin/bash
+SHELL = /bin/bash -o pipefail
 
 .PHONY: install test clean release
 
-STATICCHECK := $(shell command -v staticcheck)
-BUMP_VERSION := $(shell command -v bump_version)
+MEGACHECK := $(GOPATH)/bin/megacheck
+BUMP_VERSION := $(GOPATH)/bin/bump_version
 
 test: vet
-	go test ./...
+	go list ./... | grep -v vendor | xargs go test
 
 install:
 	go get -v github.com/kevinburke/goose/...
 
-vet:
-ifndef STATICCHECK
-	go get -u honnef.co/go/tools/cmd/staticcheck
-endif
+$(MEGACHECK):
+	go get -u honnef.co/go/tools/cmd/megacheck
+
+vet: $(MEGACHECK)
 	go vet ./cmd/... ./lib/...
-	staticcheck ./cmd/... ./lib/...
+	$(MEGACHECK) --ignore='github.com/kevinburke/goose/lib/goose/*.go:S1002' ./cmd/... ./lib/...
 
 race-test: vet
-	go test -v -race ./...
+	go list ./... | grep -v vendor | xargs go test -v -race
 
 release: race-test
 ifndef BUMP_VERSION

@@ -2,7 +2,6 @@ package goose
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -71,7 +70,7 @@ func NewDBConf(p, env string, pgschema string) (*DBConf, error) {
 	}
 
 	if !d.IsValid() {
-		return nil, errors.New(fmt.Sprintf("Invalid DBConf: %v", d))
+		return nil, fmt.Errorf("Invalid DBConf: %v", d)
 	}
 
 	return &DBConf{
