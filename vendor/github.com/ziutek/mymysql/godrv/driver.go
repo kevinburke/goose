@@ -6,14 +6,13 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
+	"github.com/ziutek/mymysql/mysql"
+	"github.com/ziutek/mymysql/native"
 	"io"
 	"net"
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/ziutek/mymysql/mysql"
-	"github.com/ziutek/mymysql/native"
 )
 
 type conn struct {
@@ -84,7 +83,7 @@ func (c conn) parseQuery(query string, args []driver.Value) (string, error) {
 		case float64:
 			s = strconv.FormatFloat(v, 'e', 12, 64)
 		default:
-			panic(fmt.Sprintf("%v (%T) can't be handled by godrv", v, v))
+			panic(fmt.Sprintf("%v (%T) can't be handled by godrv"))
 		}
 		q[n] = query[:i]
 		q[n+1] = s
@@ -189,9 +188,6 @@ func (t tx) Rollback() (err error) {
 }
 
 func (s *stmt) Close() (err error) {
-	if s.my == nil {
-		panic("godrv: stmt closed twice")
-	}
 	err = s.my.Delete()
 	s.my = nil
 	if err != nil {
@@ -250,10 +246,7 @@ func (r *rowsRes) Close() error {
 	return nil
 }
 
-var location = time.Local
-
-// DATE, DATETIME, TIMESTAMP are treated as they are in Local time zone (this
-// can be changed globaly using SetLocation function).
+// DATE, DATETIME, TIMESTAMP are treated as they are in Local time zone
 func (r *rowsRes) Next(dest []driver.Value) error {
 	if r.my == nil {
 		return io.EOF // closed before
@@ -267,7 +260,7 @@ func (r *rowsRes) Next(dest []driver.Value) error {
 					switch f.Type {
 					case native.MYSQL_TYPE_TIMESTAMP, native.MYSQL_TYPE_DATETIME,
 						native.MYSQL_TYPE_DATE, native.MYSQL_TYPE_NEWDATE:
-						r.row[i] = r.row.ForceTime(i, location)
+						r.row[i] = r.row.ForceLocaltime(i)
 					}
 				}
 			}
@@ -314,13 +307,12 @@ type Driver struct {
 //
 // OPTIONS can contain comma separated list of options in form:
 //   opt1=VAL1,opt2=VAL2,boolopt3,boolopt4
-// Currently implemented options, in addition to default MySQL variables:
+// Currently implemented options:
 //   laddr   - local address/port (eg. 1.2.3.4:0)
 //   timeout - connect timeout in format accepted by time.ParseDuration
 func (d *Driver) Open(uri string) (driver.Conn, error) {
 	cfg := *d // copy default configuration
 	pd := strings.SplitN(uri, "*", 2)
-	connCommands := []string{}
 	if len(pd) == 2 {
 		// Parse protocol part of URI
 		p := strings.SplitN(pd[0], ":", 2)
@@ -348,7 +340,7 @@ func (d *Driver) Open(uri string) (driver.Conn, error) {
 				}
 				cfg.timeout = to
 			default:
-				connCommands = append(connCommands, "SET "+k+"="+v)
+				return nil, errors.New("Unknown option: " + k)
 			}
 		}
 		// Remove protocol part
@@ -380,9 +372,6 @@ func (d *Driver) Open(uri string) (driver.Conn, error) {
 	for _, q := range cfg.initCmds {
 		c.my.Register(q) // Register initialisation commands
 	}
-	for _, q := range connCommands {
-		c.my.Register(q)
-	}
 	if err := c.my.Connect(); err != nil {
 		return nil, errFilter(err)
 	}
@@ -394,7 +383,7 @@ func (d *Driver) Open(uri string) (driver.Conn, error) {
 // Register registers initialisation commands.
 // This is workaround, see http://codereview.appspot.com/5706047
 func (drv *Driver) Register(query string) {
-	drv.initCmds = append(drv.initCmds, query)
+	drv.initCmds = append(d.initCmds, query)
 }
 
 // Dialer can be used to dial connections to MySQL. If Dialer returns (nil, nil)
@@ -408,30 +397,24 @@ func (drv *Driver) SetDialer(dialer Dialer) {
 }
 
 // Driver automatically registered in database/sql
-var dfltdrv = Driver{proto: "tcp", raddr: "127.0.0.1:3306"}
+var d = Driver{proto: "tcp", raddr: "127.0.0.1:3306"}
 
 // Register calls Register method on driver registered in database/sql
 func Register(query string) {
-	dfltdrv.Register(query)
+	d.Register(query)
 }
 
 // SetDialer calls SetDialer method on driver registered in database/sql
 func SetDialer(dialer Dialer) {
-	dfltdrv.SetDialer(dialer)
+	d.SetDialer(dialer)
 }
 
 func init() {
 	Register("SET NAMES utf8")
-	sql.Register("mymysql", &dfltdrv)
+	sql.Register("mymysql", &d)
 }
 
 // Version returns mymysql version string
 func Version() string {
 	return mysql.Version()
-}
-
-// SetLocation changes default location used to convert dates obtained from
-// server to time.Time.
-func SetLocation(loc *time.Location) {
-	location = loc
 }

@@ -5,7 +5,8 @@ language: go
 go:
   - 1.7
   - 1.8
-  - tip
+  - 1.9
+  - master
 
 install:
   - make install
