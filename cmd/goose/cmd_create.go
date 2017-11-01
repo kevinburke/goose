@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -12,14 +13,14 @@ import (
 
 var createCmd = &Command{
 	Name:    "create",
-	Usage:   "",
+	Usage:   "create <migration-name>",
 	Summary: "Create the scaffolding for a new migration",
-	Help:    `create extended help here...`,
+	Help:    `Create a file with a new migration. The file will have the given name`,
 	Run:     createRun,
+	Flag:    *flag.NewFlagSet("create", flag.ExitOnError),
 }
 
 func createRun(cmd *Command, args ...string) {
-
 	if len(args) < 1 {
 		log.Fatal("goose create: migration name required")
 	}
@@ -31,7 +32,7 @@ func createRun(cmd *Command, args ...string) {
 		log.Fatal(err)
 	}
 
-	if err = os.MkdirAll(conf.MigrationsDir, 0755); err != nil {
+	if err := os.MkdirAll(conf.MigrationsDir, 0755); err != nil {
 		log.Fatal(err)
 	}
 
