@@ -1,4 +1,3 @@
-
 [[constraint]]
   name = "github.com/go-sql-driver/mysql"
 

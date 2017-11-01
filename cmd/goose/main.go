@@ -57,6 +57,7 @@ var initCmd = &Command{
 	Usage:   "Create the scaffolding",
 	Summary: "Create the migration scaffolding",
 	Run:     initRun,
+	Flag:    *flag.NewFlagSet("init", flag.ExitOnError),
 }
 
 var dbConfTpl = []byte(`# Database configuration file.
