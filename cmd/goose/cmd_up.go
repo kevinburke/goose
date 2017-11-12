@@ -1,8 +1,10 @@
 package main
 
 import (
-	"github.com/kevinburke/goose/lib/goose"
+	"flag"
 	"log"
+
+	"github.com/kevinburke/goose/lib/goose"
 )
 
 var upCmd = &Command{
@@ -11,6 +13,7 @@ var upCmd = &Command{
 	Summary: "Migrate the DB to the most recent version available",
 	Help:    `up extended help here...`,
 	Run:     upRun,
+	Flag:    *flag.NewFlagSet("up", flag.ExitOnError),
 }
 
 func upRun(cmd *Command, args ...string) {

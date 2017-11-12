@@ -32,6 +32,7 @@ var commands = []*Command{
 	versionCmd,
 	helpCmd,
 	initCmd,
+	printCmd,
 }
 
 var versionCmd = &Command{
