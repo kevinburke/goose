@@ -1,8 +1,12 @@
+[prune]
+  unused-packages = true
+  go-tests = true
+
 [[constraint]]
   name = "github.com/go-sql-driver/mysql"
 
 [[constraint]]
-  name = "github.com/kevinburke/go-gypsy"
+  name = "github.com/kylelemons/go-gypsy"
 
 [[constraint]]
   name = "github.com/lib/pq"
