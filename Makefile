@@ -21,8 +21,8 @@ vet: $(MEGACHECK)
 race-test: vet
 	go list ./... | grep -v vendor | xargs go test -v -race
 
-release: race-test
-ifndef BUMP_VERSION
-	go get -u github.com/Shyp/bump_version
-endif
-	bump_version minor cmd/goose/main.go
+$(BUMP_VERSION):
+	go get -u github.com/kevinburke/bump_version
+
+release: race-test | $(BUMP_VERSION)
+	$(BUMP_VERSION) minor cmd/goose/main.go
