@@ -96,7 +96,7 @@ func helpRun(*Command, ...string) {
 }
 
 // The version of the goose tool.
-const VERSION = "1.9" // Bump this by running "make release".
+const VERSION = "1.10" // Bump this by running "make release".
 
 func versionRun(*Command, ...string) {
 	fmt.Fprintf(os.Stderr, "goose version %s\n", VERSION)
