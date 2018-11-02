@@ -1,6 +1,7 @@
 package native
 
 import (
+	"bytes"
 	"errors"
 	"github.com/ziutek/mymysql/mysql"
 	"log"
@@ -28,7 +29,7 @@ type Result struct {
 	warning_count int
 
 	// MySQL server status immediately after the query execution
-	status uint16
+	status mysql.ConnStatus
 
 	// Seted by GetRow if it returns nil row
 	eor_returned bool
@@ -70,6 +71,44 @@ func (res *Result) WarnCount() int {
 
 func (res *Result) MakeRow() mysql.Row {
 	return make(mysql.Row, res.field_count)
+}
+
+// getAuthResult After sending login request
+// use this func get server return packet
+func (my *Conn) getAuthResult() ([]byte, string) {
+	pr := my.newPktReader()
+	pkt := pr.readAll()
+	pkt0 := pkt[0]
+
+	// packet indicator
+	switch pkt0 {
+	case 0: // OK
+		return nil, ""
+
+	case 1: // AuthMoreData
+		return pkt[1:], ""
+
+	case 254: // EOF
+		if len(pkt) == 1 {
+			// https://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::OldAuthSwitchRequest
+			return nil, "mysql_old_password"
+		}
+		pluginEndIndex := bytes.IndexByte(pkt, 0x00)
+		if pluginEndIndex < 0 {
+			return nil, ""
+		}
+		plugin := string(pkt[1:pluginEndIndex])
+		authData := pkt[pluginEndIndex+1:]
+		return authData, plugin
+
+	case 255: // Error packet
+		panic(mysql.ErrAuthentication)
+		return nil, ""
+
+	default: // Error otherwise
+		panic(mysql.ErrUnkResultPkt)
+		return nil, ""
+	}
 }
 
 func (my *Conn) getResult(res *Result, row mysql.Row) *Result {
@@ -145,7 +184,7 @@ func (my *Conn) getOkPacket(pr *pktReader) (res *Result) {
 	// First byte was readed by getResult
 	res.affected_rows = pr.readLCB()
 	res.insert_id = pr.readLCB()
-	res.status = pr.readU16()
+	res.status = mysql.ConnStatus(pr.readU16())
 	my.status = res.status
 	res.warning_count = int(pr.readU16())
 	res.message = pr.readAll()
@@ -179,7 +218,7 @@ func (my *Conn) getErrorPacket(pr *pktReader) {
 	panic(&err)
 }
 
-func (my *Conn) getEofPacket(pr *pktReader) (warn_count int, status uint16) {
+func (my *Conn) getEofPacket(pr *pktReader) (warn_count int, status mysql.ConnStatus) {
 	if my.Debug {
 		if pr.eof() {
 			log.Printf("[%2d ->] EOF packet without body", my.seq-1)
@@ -194,7 +233,7 @@ func (my *Conn) getEofPacket(pr *pktReader) (warn_count int, status uint16) {
 	if pr.eof() {
 		return
 	}
-	status = pr.readU16()
+	status = mysql.ConnStatus(pr.readU16())
 	pr.checkEof()
 
 	if my.Debug {

@@ -4,15 +4,21 @@
 
 [[constraint]]
   name = "github.com/go-sql-driver/mysql"
+  branch = "master"
 
 [[constraint]]
   name = "github.com/kylelemons/go-gypsy"
+  branch = "master"
 
 [[constraint]]
   name = "github.com/lib/pq"
+  branch = "master"
 
 [[constraint]]
   name = "github.com/mattn/go-sqlite3"
+  revision = "b46caeea4118b68fe6530d4af508922e97317bdb"
+  source = "https://github.com/kevinburke/go-sqlite3.git"
 
 [[constraint]]
   name = "github.com/ziutek/mymysql"
+  branch = "master"

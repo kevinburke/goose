@@ -1,15 +1,16 @@
-// Thread unsafe engine for MyMySQL
+// Package native is a thread unsafe engine for MyMySQL.
 package native
 
 import (
 	"bufio"
 	"fmt"
-	"github.com/ziutek/mymysql/mysql"
 	"io"
 	"net"
 	"reflect"
 	"strings"
 	"time"
+
+	"github.com/ziutek/mymysql/mysql"
 )
 
 type serverInfo struct {
@@ -17,8 +18,9 @@ type serverInfo struct {
 	serv_ver []byte
 	thr_id   uint32
 	scramble [20]byte
-	caps     uint16
+	caps     uint32
 	lang     byte
+	plugin   []byte
 }
 
 // MySQL connection handler
@@ -30,6 +32,7 @@ type Conn struct {
 	user   string // MySQL username
 	passwd string // MySQL password
 	dbname string // Database name
+	plugin string // authentication plugin
 
 	net_conn net.Conn // MySQL connection
 	rd       *bufio.Reader
@@ -44,7 +47,7 @@ type Conn struct {
 	stmt_map  map[uint32]*Stmt // For reprepare during reconnect
 
 	// Current status of MySQL server connection
-	status uint16
+	status mysql.ConnStatus
 
 	// Maximum packet size that client can accept from server.
 	// Default 16*1024*1024-1. You may change it before connect.
@@ -67,11 +70,12 @@ type Conn struct {
 // Create new MySQL handler. The first three arguments are passed to net.Bind
 // for create connection. user and passwd are for authentication. Optional db
 // is database name (you may not specify it and use Use() method later).
-func New(proto, laddr, raddr, user, passwd string, db ...string) mysql.Conn {
+func New(proto, laddr, raddr, user, passwd string, args ...string) mysql.Conn {
 	my := Conn{
 		proto:         proto,
 		laddr:         laddr,
 		raddr:         raddr,
+		plugin:        "mysql_native_password",
 		user:          user,
 		passwd:        passwd,
 		stmt_map:      make(map[uint32]*Stmt),
@@ -79,12 +83,19 @@ func New(proto, laddr, raddr, user, passwd string, db ...string) mysql.Conn {
 		timeout:       2 * time.Minute,
 		fullFieldInfo: true,
 	}
-	if len(db) == 1 {
-		my.dbname = db[0]
-	} else if len(db) > 1 {
+	if len(args) == 1 {
+		my.dbname = args[0]
+	} else if len(args) == 2 {
+		my.dbname = args[0]
+		my.plugin = args[1]
+	} else if len(args) > 2 {
 		panic("mymy.New: too many arguments")
 	}
 	return &my
+}
+
+func (my *Conn) Credentials() (user, passwd string) {
+	return my.user, my.passwd
 }
 
 func (my *Conn) NarrowTypeSet(narrow bool) {
@@ -199,15 +210,7 @@ func (my *Conn) connect() (err error) {
 	// Initialisation
 	my.init()
 	my.auth()
-	res := my.getResult(nil, nil)
-	if res == nil {
-		// Try old password
-		my.oldPasswd()
-		res = my.getResult(nil, nil)
-		if res == nil {
-			return mysql.ErrAuthentication
-		}
-	}
+	my.authResponse()
 
 	// Execute all registered commands
 	for _, cmd := range my.init_cmds {
@@ -385,7 +388,7 @@ func (res *Result) getRow(row mysql.Row) (err error) {
 // Returns true if more results exixts. You don't have to call it before
 // NextResult method (NextResult returns nil if there is no more results).
 func (res *Result) MoreResults() bool {
-	return res.status&_SERVER_MORE_RESULTS_EXISTS != 0
+	return res.status&mysql.SERVER_MORE_RESULTS_EXISTS != 0
 }
 
 // Get the data row from server. This method reads one row of result set
@@ -785,10 +788,11 @@ func (res *Result) GetRows() ([]mysql.Row, error) {
 // Escapes special characters in the txt, so it is safe to place returned string
 // to Query method.
 func (my *Conn) Escape(txt string) string {
-	if my.status&_SERVER_STATUS_NO_BACKSLASH_ESCAPES != 0 {
-		return escapeQuotes(txt)
-	}
-	return escapeString(txt)
+	return mysql.Escape(my, txt)
+}
+
+func (my *Conn) Status() mysql.ConnStatus {
+	return my.status
 }
 
 type Transaction struct {

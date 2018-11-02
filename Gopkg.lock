@@ -2,51 +2,69 @@
 
 
 [[projects]]
+  branch = "master"
+  digest = "1:14079032efba501c7fb9c25e6edd19cddd734566fd63c9d2172c3ec30f8c8cfd"
   name = "github.com/go-sql-driver/mysql"
   packages = ["."]
-  revision = "a0583e0143b1624142adab07e0e97fe106d99561"
-  version = "v1.3"
+  pruneopts = "UT"
+  revision = "fd197cdcfae0c686792ef5399f223f5b66a30b6b"
 
 [[projects]]
   branch = "master"
+  digest = "1:c1046169c43b3993cf00edc6fd4a85472badea8497010f883fa7008802d55389"
   name = "github.com/kylelemons/go-gypsy"
   packages = ["yaml"]
+  pruneopts = "UT"
   revision = "08cad365cd28a7fba23bb1e57aa43c5e18ad8bb8"
 
 [[projects]]
   branch = "master"
+  digest = "1:934d91b5854d3084cc7d45c36b5697c40e9d624d6078cc4b9cd1163504f15b04"
   name = "github.com/lib/pq"
   packages = [
     ".",
-    "oid"
+    "oid",
   ]
+  pruneopts = "UT"
   revision = "b609790bd85edf8e9ab7e0f8912750a786177bcf"
 
 [[projects]]
+  digest = "1:8c05668ba1e2dc912e286d7231dc84170c4e549ce63c655bb01866860858c2b7"
   name = "github.com/mattn/go-sqlite3"
   packages = ["."]
-  revision = "5160b48509cf5c877bc22c11c373f8c7738cdb38"
-  version = "v1.3.0"
+  pruneopts = "UT"
+  revision = "b46caeea4118b68fe6530d4af508922e97317bdb"
+  source = "https://github.com/kevinburke/go-sqlite3.git"
 
 [[projects]]
+  branch = "master"
+  digest = "1:bba220e46b4b67dd9487e7d7761858bee3e6a49392ec1a1a415699dd89e1c39e"
   name = "github.com/ziutek/mymysql"
   packages = [
     "godrv",
     "mysql",
-    "native"
+    "native",
   ]
-  revision = "e08c2f35356576b3c3690c252fe5dca728ae9292"
-  version = "v1.5.4"
+  pruneopts = "UT"
+  revision = "6b05b0cf718f8ee11bc5e18fe78ea7cef0388dc6"
 
 [[projects]]
-  branch = "master"
-  name = "golang.org/x/net"
-  packages = ["context"]
-  revision = "c73622c77280266305273cb545f54516ced95b93"
+  digest = "1:c25289f43ac4a68d88b02245742347c94f1e108c534dda442188015ff80669b3"
+  name = "google.golang.org/appengine"
+  packages = ["cloudsql"]
+  pruneopts = "UT"
+  revision = "4a4468ece617fc8205e99368fa2200e9d1fad421"
+  version = "v1.3.0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ec05139ba738977b0a243a35a20ba5c1bcf9ea5b7305c46caba8d499375d0c86"
+  input-imports = [
+    "github.com/go-sql-driver/mysql",
+    "github.com/kylelemons/go-gypsy/yaml",
+    "github.com/lib/pq",
+    "github.com/mattn/go-sqlite3",
+    "github.com/ziutek/mymysql/godrv",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
