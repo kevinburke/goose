@@ -33,8 +33,7 @@
   name = "github.com/mattn/go-sqlite3"
   packages = ["."]
   pruneopts = "UT"
-  revision = "b46caeea4118b68fe6530d4af508922e97317bdb"
-  source = "https://github.com/kevinburke/go-sqlite3.git"
+  revision = "1fc3fd346d3cc4c610f432d8bc938bb952733873"
 
 [[projects]]
   branch = "master"
