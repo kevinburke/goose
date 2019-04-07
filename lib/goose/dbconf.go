@@ -28,7 +28,6 @@ type DBConf struct {
 
 // extract configuration details from the given file
 func NewDBConf(p, env string, pgschema string) (*DBConf, error) {
-
 	cfgFile := filepath.Join(p, "dbconf.yml")
 
 	f, err := yaml.ReadFile(cfgFile)
@@ -50,7 +49,6 @@ func NewDBConf(p, env string, pgschema string) (*DBConf, error) {
 
 	// Automatically parse postgres urls
 	if drv == "postgres" {
-
 		// Assumption: If we can parse the URL, we should
 		if parsedURL, err := pq.ParseURL(open); err == nil && parsedURL != "" {
 			open = parsedURL
@@ -70,7 +68,7 @@ func NewDBConf(p, env string, pgschema string) (*DBConf, error) {
 	}
 
 	if !d.IsValid() {
-		return nil, fmt.Errorf("Invalid DBConf: %v", d)
+		return nil, fmt.Errorf("goose: invalid driver configuration: %v", d)
 	}
 
 	return &DBConf{
