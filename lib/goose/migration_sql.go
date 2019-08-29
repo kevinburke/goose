@@ -85,10 +85,12 @@ func splitSQLStatements(r io.Reader, direction bool) (stmts []string) {
 			cmd := strings.TrimSpace(line[len(sqlCmdPrefix):])
 			switch cmd {
 			case "Up":
+				//lint:ignore S1002 would rather write it this way.
 				directionIsActive = (direction == true)
 				upSections++
 
 			case "Down":
+				//lint:ignore S1002 would rather write it this way.
 				directionIsActive = (direction == false)
 				downSections++
 
@@ -99,6 +101,7 @@ func splitSQLStatements(r io.Reader, direction bool) (stmts []string) {
 
 			case "StatementEnd":
 				if directionIsActive {
+					//lint:ignore S1002 would rather write it this way.
 					statementEnded = (ignoreSemicolons == true)
 					ignoreSemicolons = false
 				}
