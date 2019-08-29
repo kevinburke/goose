@@ -683,7 +683,7 @@ func (c *SQLiteConn) RegisterAggregator(name string, impl interface{}, pure bool
 		ai.stepArgConverters = append(ai.stepArgConverters, conv)
 	}
 	if step.IsVariadic() {
-		conv, err := callbackArg(t.In(start + stepNArgs).Elem())
+		conv, err := callbackArg(step.In(start + stepNArgs).Elem())
 		if err != nil {
 			return err
 		}
@@ -740,6 +740,8 @@ func (c *SQLiteConn) RegisterAggregator(name string, impl interface{}, pure bool
 
 // AutoCommit return which currently auto commit or not.
 func (c *SQLiteConn) AutoCommit() bool {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	return int(C.sqlite3_get_autocommit(c.db)) != 0
 }
 
@@ -1340,6 +1342,9 @@ func (d *SQLiteDriver) Open(dsn string) (driver.Conn, error) {
 		mutex|C.SQLITE_OPEN_READWRITE|C.SQLITE_OPEN_CREATE,
 		nil)
 	if rv != 0 {
+		if db != nil {
+			C.sqlite3_close_v2(db)
+		}
 		return nil, Error{Code: ErrNo(rv)}
 	}
 	if db == nil {
@@ -1376,7 +1381,7 @@ func (d *SQLiteDriver) Open(dsn string) (driver.Conn, error) {
 	//  - Activate User Authentication
 	//		Check if the user wants to activate User Authentication.
 	//		If so then first create a temporary AuthConn to the database
-	//		This is possible because we are already succesfully authenticated.
+	//		This is possible because we are already successfully authenticated.
 	//
 	//	- Check if `sqlite_user`` table exists
 	//		YES				=> Add the provided user from DSN as Admin User and
@@ -1387,7 +1392,7 @@ func (d *SQLiteDriver) Open(dsn string) (driver.Conn, error) {
 	// Create connection to SQLite
 	conn := &SQLiteConn{db: db, loc: loc, txlock: txlock}
 
-	// Password Cipher has to be registerd before authentication
+	// Password Cipher has to be registered before authentication
 	if len(authCrypt) > 0 {
 		switch strings.ToUpper(authCrypt) {
 		case "SHA1":
@@ -1517,10 +1522,10 @@ func (d *SQLiteDriver) Open(dsn string) (driver.Conn, error) {
 		// Before going any further, we need to check that the user
 		// has provided an username and password within the DSN.
 		// We are not allowed to continue.
-		if len(authUser) < 0 {
+		if len(authUser) == 0 {
 			return nil, fmt.Errorf("Missing '_auth_user' while user authentication was requested with '_auth'")
 		}
-		if len(authPass) < 0 {
+		if len(authPass) == 0 {
 			return nil, fmt.Errorf("Missing '_auth_pass' while user authentication was requested with '_auth'")
 		}
 
@@ -1862,7 +1867,7 @@ func (s *SQLiteStmt) query(ctx context.Context, args []namedValue) (driver.Rows,
 	return rows, nil
 }
 
-// LastInsertId teturn last inserted ID.
+// LastInsertId return last inserted ID.
 func (r *SQLiteResult) LastInsertId() (int64, error) {
 	return r.id, nil
 }
@@ -2024,16 +2029,11 @@ func (rc *SQLiteRows) Next(dest []driver.Value) error {
 		case C.SQLITE_BLOB:
 			p := C.sqlite3_column_blob(rc.s.s, C.int(i))
 			if p == nil {
-				dest[i] = nil
+				dest[i] = []byte{}
 				continue
 			}
-			n := int(C.sqlite3_column_bytes(rc.s.s, C.int(i)))
-			switch dest[i].(type) {
-			default:
-				slice := make([]byte, n)
-				copy(slice[:], (*[1 << 30]byte)(p)[0:n])
-				dest[i] = slice
-			}
+			n := C.sqlite3_column_bytes(rc.s.s, C.int(i))
+			dest[i] = C.GoBytes(p, n)
 		case C.SQLITE_NULL:
 			dest[i] = nil
 		case C.SQLITE_TEXT:
@@ -2062,9 +2062,8 @@ func (rc *SQLiteRows) Next(dest []driver.Value) error {
 				}
 				dest[i] = t
 			default:
-				dest[i] = []byte(s)
+				dest[i] = s
 			}
-
 		}
 	}
 	return nil

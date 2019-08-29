@@ -3,11 +3,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:14079032efba501c7fb9c25e6edd19cddd734566fd63c9d2172c3ec30f8c8cfd"
+  digest = "1:783d985ffb1affe60a210e8620e25a8cd41475940ce19a3a7bab25c795b899fe"
   name = "github.com/go-sql-driver/mysql"
   packages = ["."]
   pruneopts = "UT"
-  revision = "fd197cdcfae0c686792ef5399f223f5b66a30b6b"
+  revision = "877a9775f06853f611fb2d4e817d92479242d1cd"
 
 [[projects]]
   branch = "master"
@@ -19,25 +19,27 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:934d91b5854d3084cc7d45c36b5697c40e9d624d6078cc4b9cd1163504f15b04"
+  digest = "1:ee780c2838219eedc4146248ddf9b82bb6a4a344425ee1aeb9f0d6eb8435614d"
   name = "github.com/lib/pq"
   packages = [
     ".",
     "oid",
+    "scram",
   ]
   pruneopts = "UT"
-  revision = "b609790bd85edf8e9ab7e0f8912750a786177bcf"
-
-[[projects]]
-  digest = "1:8c05668ba1e2dc912e286d7231dc84170c4e549ce63c655bb01866860858c2b7"
-  name = "github.com/mattn/go-sqlite3"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "1fc3fd346d3cc4c610f432d8bc938bb952733873"
+  revision = "78223426e7c66d631117c0a9da1b7f3fde4d23a5"
 
 [[projects]]
   branch = "master"
-  digest = "1:bba220e46b4b67dd9487e7d7761858bee3e6a49392ec1a1a415699dd89e1c39e"
+  digest = "1:58ae77773435c047bdf81309c148f347699050392996c3d9c3d4737033524144"
+  name = "github.com/mattn/go-sqlite3"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "d3c690956bde8789300d0dd7e868189cb88cf6ad"
+
+[[projects]]
+  branch = "master"
+  digest = "1:2e3d387b408153bc6423b6b17597418365158f739c7fa701867fc91816a264c5"
   name = "github.com/ziutek/mymysql"
   packages = [
     "godrv",
@@ -45,7 +47,7 @@
     "native",
   ]
   pruneopts = "UT"
-  revision = "6b05b0cf718f8ee11bc5e18fe78ea7cef0388dc6"
+  revision = "adcfec29206e9f557b2873e46797cc7ceafc81ec"
 
 [[projects]]
   digest = "1:c25289f43ac4a68d88b02245742347c94f1e108c534dda442188015ff80669b3"
