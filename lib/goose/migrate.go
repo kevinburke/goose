@@ -101,7 +101,8 @@ func RunMigrationsOnDb(conf *DBConf, migrationsDir string, target int64, db *sql
 }
 
 // CollectMigrations collects and returns all of the valid looking migration
-// scripts in dirpath.
+// scripts in dirpath. Set current to 0 and target to a very large number to
+// collect all migrations in the directory.
 func CollectMigrations(dirpath string, current, target int64) ([]*Migration, error) {
 	// extract the numeric component of each migration,
 	// filter out any uninteresting files,
@@ -134,8 +135,9 @@ func CollectMigrations(dirpath string, current, target int64) ([]*Migration, err
 	return m, nil
 }
 
+// versionFilter returns true if v is greater than current and less than or
+// equal to target.
 func versionFilter(v, current, target int64) bool {
-
 	if target > current {
 		return v > current && v <= target
 	}
