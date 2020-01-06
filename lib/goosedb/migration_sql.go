@@ -1,4 +1,4 @@
-package goose
+package goosedb
 
 import (
 	"bufio"
@@ -10,6 +10,75 @@ import (
 	"path/filepath"
 	"strings"
 )
+
+// Run a migration specified in raw SQL.
+//
+// Sections of the script can be annotated with a special comment,
+// starting with "-- +goose" to specify whether the section should
+// be applied during an Up or Down migration
+//
+// All statements following an Up or Down directive are grouped together
+// until another direction directive is found.
+func runSQLMigration(conf *DBConf, db *sql.DB, scriptFile string, v int64, direction bool) error {
+	f, err := os.Open(scriptFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// find each statement, checking annotations for up/down direction
+	// and execute each of them in the current transaction.
+	// Commits the transaction if successfully applied each statement and
+	// records the version into the version table or returns an error and
+	// rolls back the transaction.
+	stmts := splitSQLStatements(f, direction)
+
+	// Choose query strategy
+	singleQueryOutsideTxn := false
+	for _, query := range stmts {
+		if cannotRunInTransaction(query) {
+			if len(stmts) > 1 {
+				log.Fatalf("Query %s cannot run in a transaction, but was paired with other queries; run it in isolation", query)
+			} else {
+				singleQueryOutsideTxn = true
+			}
+		}
+	}
+
+	if singleQueryOutsideTxn {
+		if _, err = db.Exec(stmts[0]); err != nil {
+			log.Fatalf("FAIL %s (%v), quitting migration.", filepath.Base(scriptFile), err)
+			return err
+		}
+		stmt := conf.Driver.Dialect.insertVersionSql()
+		if _, err := db.Exec(stmt, v, direction); err != nil {
+			log.Printf("WARNING: Executed single query %s but could not commit the version bump %s; error was %s\n", stmts[0], stmt, err.Error())
+		}
+		return err
+	}
+
+	txn, err := db.Begin()
+	if err != nil {
+		log.Fatal("db.Begin:", err)
+	}
+
+	for _, query := range stmts {
+		if _, err = txn.Exec(query); err != nil {
+			txn.Rollback()
+			log.Fatalf("FAIL %s (%v), quitting migration.", filepath.Base(scriptFile), err)
+			return err
+		}
+	}
+
+	// Update the version table for the given migration,
+	// and finalize the transaction.
+	// XXX: drop goose_db_version table on some minimum version number?
+	stmt := conf.Driver.Dialect.insertVersionSql()
+	if _, err := txn.Exec(stmt, v, direction); err != nil {
+		txn.Rollback()
+		return err
+	}
+	return txn.Commit()
+}
 
 const sqlCmdPrefix = "-- +goose "
 
@@ -145,74 +214,4 @@ func splitSQLStatements(r io.Reader, direction bool) (stmts []string) {
 	}
 
 	return
-}
-
-// Run a migration specified in raw SQL.
-//
-// Sections of the script can be annotated with a special comment,
-// starting with "-- +goose" to specify whether the section should
-// be applied during an Up or Down migration
-//
-// All statements following an Up or Down directive are grouped together
-// until another direction directive is found.
-func runSQLMigration(conf *DBConf, db *sql.DB, scriptFile string, v int64, direction bool) error {
-
-	f, err := os.Open(scriptFile)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// find each statement, checking annotations for up/down direction
-	// and execute each of them in the current transaction.
-	// Commits the transaction if successfully applied each statement and
-	// records the version into the version table or returns an error and
-	// rolls back the transaction.
-	stmts := splitSQLStatements(f, direction)
-
-	// Choose query strategy
-	singleQueryOutsideTxn := false
-	for _, query := range stmts {
-		if cannotRunInTransaction(query) {
-			if len(stmts) > 1 {
-				log.Fatalf("Query %s cannot run in a transaction, but was paired with other queries; run it in isolation", query)
-			} else {
-				singleQueryOutsideTxn = true
-			}
-		}
-	}
-
-	if singleQueryOutsideTxn {
-		if _, err = db.Exec(stmts[0]); err != nil {
-			log.Fatalf("FAIL %s (%v), quitting migration.", filepath.Base(scriptFile), err)
-			return err
-		}
-		stmt := conf.Driver.Dialect.insertVersionSql()
-		if _, err := db.Exec(stmt, v, direction); err != nil {
-			log.Printf("WARNING: Executed single query %s but could not commit the version bump %s; error was %s\n", stmts[0], stmt, err.Error())
-		}
-		return err
-	}
-
-	txn, err := db.Begin()
-	if err != nil {
-		log.Fatal("db.Begin:", err)
-	}
-
-	for _, query := range stmts {
-		if _, err = txn.Exec(query); err != nil {
-			txn.Rollback()
-			log.Fatalf("FAIL %s (%v), quitting migration.", filepath.Base(scriptFile), err)
-			return err
-		}
-	}
-
-	// Update the version table for the given migration,
-	// and finalize the transaction.
-	// XXX: drop goose_db_version table on some minimum version number?
-	stmt := conf.Driver.Dialect.insertVersionSql()
-	if _, err := txn.Exec(stmt, v, direction); err != nil {
-		txn.Rollback()
-		return err
-	}
-	return txn.Commit()
 }

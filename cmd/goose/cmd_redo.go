@@ -1,8 +1,10 @@
 package main
 
 import (
-	"github.com/kevinburke/goose/lib/goose"
 	"log"
+
+	"github.com/kevinburke/goose/lib/goose"
+	"github.com/kevinburke/goose/lib/goosedb"
 )
 
 var redoCmd = &Command{
@@ -19,7 +21,7 @@ func redoRun(cmd *Command, args ...string) {
 		log.Fatal(err)
 	}
 
-	current, err := goose.GetDBVersion(conf)
+	current, err := goosedb.GetDBVersion(conf)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -29,11 +31,11 @@ func redoRun(cmd *Command, args ...string) {
 		log.Fatal(err)
 	}
 
-	if err := goose.RunMigrations(conf, conf.MigrationsDir, previous); err != nil {
+	if err := goosedb.RunMigrations(conf, conf.MigrationsDir, previous); err != nil {
 		log.Fatal(err)
 	}
 
-	if err := goose.RunMigrations(conf, conf.MigrationsDir, current); err != nil {
+	if err := goosedb.RunMigrations(conf, conf.MigrationsDir, current); err != nil {
 		log.Fatal(err)
 	}
 }

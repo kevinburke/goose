@@ -9,7 +9,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/kevinburke/goose/lib/goose"
+	"github.com/kevinburke/goose/lib/goosedb"
 )
 
 // global options. available to any subcommands.
@@ -18,8 +18,8 @@ var flagEnv = flag.String("env", "development", "which DB environment to use")
 var flagPgSchema = flag.String("pgschema", "", "which postgres-schema to migrate (default = none)")
 
 // helper to create a DBConf from the given flags
-func dbConfFromFlags() (*goose.DBConf, error) {
-	return goose.NewDBConf(*flagPath, *flagEnv, *flagPgSchema)
+func dbConfFromFlags() (*goosedb.DBConf, error) {
+	return goosedb.NewDBConf(*flagPath, *flagEnv, *flagPgSchema)
 }
 
 var commands = []*Command{

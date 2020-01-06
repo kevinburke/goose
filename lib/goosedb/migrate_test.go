@@ -1,8 +1,14 @@
-package goose
+package goosedb
 
 import (
 	"testing"
+
+	"github.com/kevinburke/goose/lib/goose"
 )
+
+func newMigration(v int64, src string) *goose.Migration {
+	return &goose.Migration{Version: v, Next: -1, Previous: -1, Source: src}
+}
 
 func TestMigrationMapSortUp(t *testing.T) {
 

@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/kevinburke/goose/lib/goose"
+	"github.com/kevinburke/goose/lib/goosedb"
 )
 
 var upCmd = &Command{
@@ -28,7 +29,7 @@ func upRun(cmd *Command, args ...string) {
 		log.Fatal(err)
 	}
 
-	if err := goose.RunMigrations(conf, conf.MigrationsDir, target); err != nil {
+	if err := goosedb.RunMigrations(conf, conf.MigrationsDir, target); err != nil {
 		log.Fatal(err)
 	}
 }

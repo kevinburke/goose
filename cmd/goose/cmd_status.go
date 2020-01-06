@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/kevinburke/goose/lib/goose"
+	"github.com/kevinburke/goose/lib/goosedb"
 )
 
 var statusCmd = &Command{
@@ -33,14 +34,14 @@ func statusRun(cmd *Command, args ...string) {
 		log.Fatal(e)
 	}
 
-	db, e := goose.OpenDBFromDBConf(conf)
+	db, e := goosedb.OpenDBFromDBConf(conf)
 	if e != nil {
 		log.Fatal("couldn't open DB:", e)
 	}
 	defer db.Close()
 
 	// must ensure that the version table exists if we're running on a pristine DB
-	if _, e := goose.EnsureDBVersion(conf, db); e != nil {
+	if _, e := goosedb.EnsureDBVersion(conf, db); e != nil {
 		log.Fatal(e)
 	}
 

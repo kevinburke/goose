@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/kevinburke/goose/lib/goose"
 	"log"
+
+	"github.com/kevinburke/goose/lib/goosedb"
 )
 
 var dbVersionCmd = &Command{
@@ -20,7 +21,7 @@ func dbVersionRun(cmd *Command, args ...string) {
 		log.Fatal(err)
 	}
 
-	current, err := goose.GetDBVersion(conf)
+	current, err := goosedb.GetDBVersion(conf)
 	if err != nil {
 		log.Fatal(err)
 	}
