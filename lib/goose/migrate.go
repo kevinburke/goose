@@ -100,14 +100,17 @@ func RunMigrationsOnDb(conf *DBConf, migrationsDir string, target int64, db *sql
 	return nil
 }
 
-// collect all the valid looking migration scripts in the
-// migrations folder, and key them by version
-func CollectMigrations(dirpath string, current, target int64) (m []*Migration, err error) {
-
+// CollectMigrations collects and returns all of the valid looking migration
+// scripts in dirpath.
+func CollectMigrations(dirpath string, current, target int64) ([]*Migration, error) {
 	// extract the numeric component of each migration,
 	// filter out any uninteresting files,
 	// and ensure we only have one file per migration version.
-	filepath.Walk(dirpath, func(name string, info os.FileInfo, err error) error {
+	m := make([]*Migration, 0)
+	err := filepath.Walk(dirpath, func(name string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
 
 		if v, e := NumericComponent(name); e == nil {
 
@@ -125,7 +128,9 @@ func CollectMigrations(dirpath string, current, target int64) (m []*Migration, e
 
 		return nil
 	})
-
+	if err != nil {
+		return nil, err
+	}
 	return m, nil
 }
 
@@ -143,7 +148,6 @@ func versionFilter(v, current, target int64) bool {
 }
 
 func (ms migrationSorter) Sort(direction bool) {
-
 	// sort ascending or descending by version
 	if direction {
 		sort.Sort(ms)
@@ -163,33 +167,37 @@ func (ms migrationSorter) Sort(direction bool) {
 	}
 }
 
-// look for migration scripts with names in the form:
-//  XXX_descriptivename.ext
-// where XXX specifies the version number
-// and ext specifies the type of migration
+// NumericComponent returns the integer part of name, if it exists, or an error
+// if name does not resemble a Goose migration file.
+//
+// The function looks for migration scripts with names in the form:
+//
+//      XXX_descriptivename.ext
+//
+// where XXX specifies the version number and ext specifies the type of the
+// migration.
 func NumericComponent(name string) (int64, error) {
-
 	base := filepath.Base(name)
 
 	if ext := filepath.Ext(base); ext != ".sql" {
-		return 0, errors.New("not a recognized migration file type")
+		return 0, errors.New("goose: not a recognized migration file type")
 	}
 
 	idx := strings.Index(base, "_")
 	if idx < 0 {
-		return 0, errors.New("no separator found")
+		return 0, errors.New("goose: no separator found")
 	}
 
 	n, e := strconv.ParseInt(base[:idx], 10, 64)
 	if e == nil && n <= 0 {
-		return 0, errors.New("migration IDs must be greater than zero")
+		return 0, errors.New("goose: migration IDs must be greater than zero")
 	}
 
 	return n, e
 }
 
-// retrieve the current version for this DB.
-// Create and initialize the DB version table if it doesn't exist.
+// EnsureDBVersion retrieves the current version for this DB, creating and
+// initializing the DB version table if it doesn't exist.
 func EnsureDBVersion(conf *DBConf, db *sql.DB) (int64, error) {
 
 	rows, err := conf.Driver.Dialect.dbVersionQuery(db)
@@ -210,7 +218,7 @@ func EnsureDBVersion(conf *DBConf, db *sql.DB) (int64, error) {
 	for rows.Next() {
 		var row MigrationRecord
 		if err = rows.Scan(&row.VersionId, &row.IsApplied); err != nil {
-			log.Fatal("error scanning rows:", err)
+			return 0, fmt.Errorf("error scanning rows: %w", err)
 		}
 
 		// have we already marked this version to be skipped?
