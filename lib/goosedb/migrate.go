@@ -141,7 +141,6 @@ func createVersionTable(conf *DBConf, db *sql.DB) error {
 // EnsureDBVersion retrieves the current version for this DB, creating and
 // initializing the DB version table if it doesn't exist.
 func EnsureDBVersion(conf *DBConf, db *sql.DB) (int64, error) {
-
 	rows, err := conf.Driver.Dialect.dbVersionQuery(db)
 	if err != nil {
 		if err == ErrTableDoesNotExist {
