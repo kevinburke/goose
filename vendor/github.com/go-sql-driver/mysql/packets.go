@@ -13,6 +13,7 @@ import (
 	"crypto/tls"
 	"database/sql/driver"
 	"encoding/binary"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -115,7 +116,7 @@ func (mc *mysqlConn) writePacket(data []byte) error {
 		if mc.cfg.ReadTimeout != 0 {
 			err = conn.SetReadDeadline(time.Time{})
 		}
-		if err == nil {
+		if err == nil && mc.cfg.CheckConnLiveness {
 			err = connCheck(conn)
 		}
 		if err != nil {
@@ -348,6 +349,12 @@ func (mc *mysqlConn) writeHandshakeResponsePacket(authResp []byte, plugin string
 		return errors.New("unknown collation")
 	}
 
+	// Filler [23 bytes] (all 0x00)
+	pos := 13
+	for ; pos < 13+23; pos++ {
+		data[pos] = 0
+	}
+
 	// SSL Connection Request Packet
 	// http://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::SSLRequest
 	if mc.cfg.tls != nil {
@@ -364,12 +371,6 @@ func (mc *mysqlConn) writeHandshakeResponsePacket(authResp []byte, plugin string
 		mc.rawConn = mc.netConn
 		mc.netConn = tlsConn
 		mc.buf.nc = tlsConn
-	}
-
-	// Filler [23 bytes] (all 0x00)
-	pos := 13
-	for ; pos < 13+23; pos++ {
-		data[pos] = 0
 	}
 
 	// User [null terminated string]
@@ -1003,6 +1004,9 @@ func (stmt *mysqlStmt) writeExecutePacket(args []driver.Value) error {
 				continue
 			}
 
+			if v, ok := arg.(json.RawMessage); ok {
+				arg = []byte(v)
+			}
 			// cache types and values
 			switch v := arg.(type) {
 			case int64:

@@ -3,11 +3,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:783d985ffb1affe60a210e8620e25a8cd41475940ce19a3a7bab25c795b899fe"
+  digest = "1:d6baa2e3242a76b6b8d3812fb0c451312ea16d1b893cdbcb6a8198ddf897dc11"
   name = "github.com/go-sql-driver/mysql"
   packages = ["."]
   pruneopts = "UT"
-  revision = "877a9775f06853f611fb2d4e817d92479242d1cd"
+  revision = "681ffa848bae8d0d7b1a452963c0705b132308f7"
 
 [[projects]]
   branch = "master"
@@ -19,7 +19,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:ee780c2838219eedc4146248ddf9b82bb6a4a344425ee1aeb9f0d6eb8435614d"
+  digest = "1:05de5942f7d2b280d098f18b7ebc72fdf1587d01d13979ebb413acc833cf3245"
   name = "github.com/lib/pq"
   packages = [
     ".",
@@ -27,15 +27,15 @@
     "scram",
   ]
   pruneopts = "UT"
-  revision = "78223426e7c66d631117c0a9da1b7f3fde4d23a5"
+  revision = "11720195feb4140252d89ec87e6ec66810ca708b"
 
 [[projects]]
   branch = "master"
-  digest = "1:58ae77773435c047bdf81309c148f347699050392996c3d9c3d4737033524144"
+  digest = "1:af2f90219f05ee54fc32c9246a60db9b38a796cf23347dc2b43c7765fa4a31e6"
   name = "github.com/mattn/go-sqlite3"
   packages = ["."]
   pruneopts = "UT"
-  revision = "d3c690956bde8789300d0dd7e868189cb88cf6ad"
+  revision = "98a44bcf5949f178c8116fa30e62c9ac2ef65927"
 
 [[projects]]
   branch = "master"
@@ -48,14 +48,6 @@
   ]
   pruneopts = "UT"
   revision = "adcfec29206e9f557b2873e46797cc7ceafc81ec"
-
-[[projects]]
-  digest = "1:c25289f43ac4a68d88b02245742347c94f1e108c534dda442188015ff80669b3"
-  name = "google.golang.org/appengine"
-  packages = ["cloudsql"]
-  pruneopts = "UT"
-  revision = "4a4468ece617fc8205e99368fa2200e9d1fad421"
-  version = "v1.3.0"
 
 [solve-meta]
   analyzer-name = "dep"
