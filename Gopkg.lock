@@ -3,11 +3,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:d6baa2e3242a76b6b8d3812fb0c451312ea16d1b893cdbcb6a8198ddf897dc11"
+  digest = "1:3aa6a8f17b8b6da3357e5df1e0c3763a69e52745181f62b0570eae32b025e3b2"
   name = "github.com/go-sql-driver/mysql"
   packages = ["."]
   pruneopts = "UT"
-  revision = "681ffa848bae8d0d7b1a452963c0705b132308f7"
+  revision = "128a6737a20278b625f8de647998fec7b7a2dc3e"
 
 [[projects]]
   branch = "master"
