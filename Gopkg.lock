@@ -3,11 +3,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:3aa6a8f17b8b6da3357e5df1e0c3763a69e52745181f62b0570eae32b025e3b2"
+  digest = "1:43af1a4fe9d8ff13761bcd89534690f8637692f5f466393b5babfdd9ee01c6a9"
   name = "github.com/go-sql-driver/mysql"
   packages = ["."]
   pruneopts = "UT"
-  revision = "128a6737a20278b625f8de647998fec7b7a2dc3e"
+  revision = "12508c83901b1a418e3dea51850f956f32506f4e"
 
 [[projects]]
   branch = "master"
@@ -31,11 +31,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:af2f90219f05ee54fc32c9246a60db9b38a796cf23347dc2b43c7765fa4a31e6"
+  digest = "1:5eece2bc660110c2c1057459ccdb6a4683542b61f325810a905e7815aa03791a"
   name = "github.com/mattn/go-sqlite3"
   packages = ["."]
   pruneopts = "UT"
-  revision = "98a44bcf5949f178c8116fa30e62c9ac2ef65927"
+  revision = "aa77c03e2fcb7ed283920d09a0fb6b873488b5be"
 
 [[projects]]
   branch = "master"
