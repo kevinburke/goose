@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"database/sql"
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -37,7 +36,6 @@ func runSQLMigration(conf *DBConf, db *sql.DB, scriptFile string, v int64, direc
 	// Choose query strategy
 	singleQueryOutsideTxn := false
 	for _, query := range stmts {
-		fmt.Println("run in txn?", query, !cannotRunInTransaction(query))
 		if cannotRunInTransaction(query) {
 			if len(stmts) > 1 {
 				log.Fatalf("Query %s cannot run in a transaction, but was paired with other queries; run it in isolation", query)
