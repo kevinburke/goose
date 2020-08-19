@@ -30,6 +30,9 @@ create index concurrently idx_name on accounts(foo)
 	`, true},
 	{`create index idx_name on accounts(foo)`, false},
 	{`create unique index concurrently idx_name on accounts(foo)`, true},
+	{`create unique index concurrently
+idx_name on accounts
+((foo))`, true},
 	{`alter type language add value if not exists`, true},
 	{`alter type language rename to foo`, false},
 }

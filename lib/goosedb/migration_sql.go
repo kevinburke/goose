@@ -4,10 +4,12 @@ import (
 	"bufio"
 	"bytes"
 	"database/sql"
+	"fmt"
 	"io"
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 )
 
@@ -35,6 +37,7 @@ func runSQLMigration(conf *DBConf, db *sql.DB, scriptFile string, v int64, direc
 	// Choose query strategy
 	singleQueryOutsideTxn := false
 	for _, query := range stmts {
+		fmt.Println("run in txn?", query, !cannotRunInTransaction(query))
 		if cannotRunInTransaction(query) {
 			if len(stmts) > 1 {
 				log.Fatalf("Query %s cannot run in a transaction, but was paired with other queries; run it in isolation", query)
@@ -101,6 +104,8 @@ func endsWithSemicolon(line string) bool {
 	return strings.HasSuffix(prev, ";")
 }
 
+var concurrentIdxRx = regexp.MustCompile(`^CREATE (UNIQUE )?INDEX CONCURRENTLY\s`)
+
 func cannotRunInTransaction(query string) bool {
 	upQuery := strings.TrimSpace(strings.ToUpper(query))
 	lines := strings.Split(upQuery, "\n")
@@ -117,8 +122,7 @@ func cannotRunInTransaction(query string) bool {
 		}
 	}
 	// There are probably more potential cases here.
-	return strings.HasPrefix(upQuery, "CREATE INDEX CONCURRENTLY ") ||
-		strings.HasPrefix(upQuery, "CREATE UNIQUE INDEX CONCURRENTLY ") ||
+	return concurrentIdxRx.MatchString(upQuery) ||
 		(strings.HasPrefix(upQuery, "ALTER TYPE ") && strings.Contains(upQuery, " ADD "))
 }
 
