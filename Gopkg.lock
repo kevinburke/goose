@@ -3,23 +3,23 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:f6381c2495ecca8a35c0b85616cc73a200807bde7bfdf357d7e9086f191b852d"
+  digest = "1:fd09fcb355eea90c19f47f2ecaceda3c665b3e2b9760ad680177aaa6c989c062"
   name = "github.com/go-sql-driver/mysql"
   packages = ["."]
   pruneopts = "UT"
-  revision = "46351a8892976898935f653f5333782579a96fa5"
+  revision = "fe2230a8b20cee1e48f7b75a9b363def5f950ba0"
 
 [[projects]]
   branch = "master"
-  digest = "1:c1046169c43b3993cf00edc6fd4a85472badea8497010f883fa7008802d55389"
+  digest = "1:e3acb89b329503c5a80655873807aface673f2bd7a5be36217bbdf8e2029fc8f"
   name = "github.com/kylelemons/go-gypsy"
   packages = ["yaml"]
   pruneopts = "UT"
-  revision = "08cad365cd28a7fba23bb1e57aa43c5e18ad8bb8"
+  revision = "95000da7cfdd034f2a86bdd5e11df3372bae5c0d"
 
 [[projects]]
   branch = "master"
-  digest = "1:58fddde837732f152d80db3772714542a6cfe97fbc716eedcc912b6f0c70d1b5"
+  digest = "1:6ba33f676b07a9af41146dc8350a1505e3749e7363581e8f94c9e11608720a2b"
   name = "github.com/lib/pq"
   packages = [
     ".",
@@ -27,15 +27,15 @@
     "scram",
   ]
   pruneopts = "UT"
-  revision = "083382b7e6fc78cc91eb57afab268fe2f1b6ed6d"
+  revision = "072e83d238c297c71cab11154695af301010031e"
 
 [[projects]]
   branch = "master"
-  digest = "1:3b97bdf4226ee406513fde826f11709cd38e168847ea46c713e583aee072d317"
+  digest = "1:531f28c634f8e2b1848e63de73af15fb180d048c8e052fb0c385b6813c880a0f"
   name = "github.com/mattn/go-sqlite3"
   packages = ["."]
   pruneopts = "UT"
-  revision = "2329c6ea75848eeef874a9823d87f406047b64fe"
+  revision = "ab91e9342b029f7b8d6097257c9a7874153a5b3f"
 
 [[projects]]
   branch = "master"

@@ -58,8 +58,14 @@ _Go MySQL Driver_ is an implementation of Go's `database/sql/driver` interface. 
 Use `mysql` as `driverName` and a valid [DSN](#dsn-data-source-name)  as `dataSourceName`:
 
 ```go
-import "database/sql"
-import _ "github.com/go-sql-driver/mysql"
+import (
+	"database/sql"
+	"time"
+
+	_ "github.com/go-sql-driver/mysql"
+)
+
+// ...
 
 db, err := sql.Open("mysql", "user:password@/dbname")
 if err != nil {
@@ -149,7 +155,7 @@ Valid Values:   true, false
 Default:        false
 ```
 
-`allowCleartextPasswords=true` allows using the [cleartext client side plugin](http://dev.mysql.com/doc/en/cleartext-authentication-plugin.html) if required by an account, such as one defined with the [PAM authentication plugin](http://dev.mysql.com/doc/en/pam-authentication-plugin.html). Sending passwords in clear text may be a security problem in some configurations. To avoid problems if there is any possibility that the password would be intercepted, clients should connect to MySQL Server using a method that protects the password. Possibilities include [TLS / SSL](#tls), IPsec, or a private network.
+`allowCleartextPasswords=true` allows using the [cleartext client side plugin](https://dev.mysql.com/doc/en/cleartext-pluggable-authentication.html) if required by an account, such as one defined with the [PAM authentication plugin](http://dev.mysql.com/doc/en/pam-authentication-plugin.html). Sending passwords in clear text may be a security problem in some configurations. To avoid problems if there is any possibility that the password would be intercepted, clients should connect to MySQL Server using a method that protects the password. Possibilities include [TLS / SSL](#tls), IPsec, or a private network.
 
 ##### `allowNativePasswords`
 
