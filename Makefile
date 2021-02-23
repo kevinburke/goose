@@ -6,7 +6,7 @@ STATICCHECK := $(GOPATH)/bin/staticcheck
 BUMP_VERSION := $(GOPATH)/bin/bump_version
 
 test: lint
-	go list ./... | grep -v vendor | xargs go test
+	go test ./...
 
 install:
 	go get -v github.com/kevinburke/goose/...
@@ -15,11 +15,11 @@ $(STATICCHECK):
 	go get -u honnef.co/go/tools/cmd/staticcheck
 
 lint: $(STATICCHECK)
-	go vet ./cmd/... ./lib/...
-	$(STATICCHECK) ./cmd/... ./lib/...
+	go vet ./...
+	$(STATICCHECK) ./...
 
 race-test: lint
-	go list ./... | grep -v vendor | xargs go test -v -race
+	go test -v -race ./...
 
 $(BUMP_VERSION):
 	go get -u github.com/kevinburke/bump_version
