@@ -120,7 +120,10 @@ func TestSplitStatements(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		stmts := splitSQLStatements(strings.NewReader(test.sql), test.direction)
+		stmts, err := splitSQLStatements(strings.NewReader(test.sql), test.direction)
+		if err != nil {
+			t.Fatal(err)
+		}
 		if len(stmts) != test.count {
 			t.Errorf("incorrect number of stmts. got %v, want %v", len(stmts), test.count)
 		}

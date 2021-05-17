@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"database/sql"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -23,15 +24,19 @@ import (
 func runSQLMigration(conf *DBConf, db *sql.DB, scriptFile string, v int64, direction bool) error {
 	f, err := os.Open(scriptFile)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	defer f.Close()
 
 	// find each statement, checking annotations for up/down direction
 	// and execute each of them in the current transaction.
 	// Commits the transaction if successfully applied each statement and
 	// records the version into the version table or returns an error and
 	// rolls back the transaction.
-	stmts := splitSQLStatements(f, direction)
+	stmts, err := splitSQLStatements(f, direction)
+	if err != nil {
+		return err
+	}
 
 	// Choose query strategy
 	singleQueryOutsideTxn := false
@@ -133,8 +138,7 @@ func cannotRunInTransaction(query string) bool {
 // within a statement. For these cases, we provide the explicit annotations
 // 'StatementBegin' and 'StatementEnd' to allow the script to
 // tell us to ignore semicolons.
-func splitSQLStatements(r io.Reader, direction bool) (stmts []string) {
-
+func splitSQLStatements(r io.Reader, direction bool) ([]string, error) {
 	var buf bytes.Buffer
 	scanner := bufio.NewScanner(r)
 
@@ -147,6 +151,7 @@ func splitSQLStatements(r io.Reader, direction bool) (stmts []string) {
 	ignoreSemicolons := false
 	directionIsActive := false
 
+	stmts := make([]string, 0)
 	for scanner.Scan() {
 
 		line := scanner.Text()
@@ -184,7 +189,7 @@ func splitSQLStatements(r io.Reader, direction bool) (stmts []string) {
 		}
 
 		if _, err := buf.WriteString(line + "\n"); err != nil {
-			log.Fatalf("io err: %v", err)
+			return nil, fmt.Errorf("io err: %v", err)
 		}
 
 		// Wrap up the two supported cases: 1) basic with semicolon; 2) psql statement
@@ -198,22 +203,22 @@ func splitSQLStatements(r io.Reader, direction bool) (stmts []string) {
 	}
 
 	if err := scanner.Err(); err != nil {
-		log.Fatalf("scanning migration: %v", err)
+		return nil, fmt.Errorf("scanning migration: %v", err)
 	}
 
 	// diagnose likely migration script errors
 	if ignoreSemicolons {
-		log.Println("WARNING: saw '-- +goose StatementBegin' with no matching '-- +goose StatementEnd'")
+		return nil, fmt.Errorf("saw '-- +goose StatementBegin' with no matching '-- +goose StatementEnd'")
 	}
 
 	if bufferRemaining := strings.TrimSpace(buf.String()); len(bufferRemaining) > 0 {
-		log.Printf("WARNING: Unexpected unfinished SQL query: %s. Missing a semicolon?\n", bufferRemaining)
+		return nil, fmt.Errorf("unexpected unfinished SQL query: %s. Missing a semicolon?", bufferRemaining)
 	}
 
 	if upSections == 0 && downSections == 0 {
-		log.Fatalf(`ERROR: no Up/Down annotations found, so no statements were executed.
-			See https://github.com/kevinburke/goose for details.`)
+		return nil, fmt.Errorf(`no Up/Down annotations found, so no statements were executed.
+See https://github.com/kevinburke/goose for details`)
 	}
 
-	return
+	return stmts, nil
 }
