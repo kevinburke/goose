@@ -15,7 +15,6 @@ jobs:
     - run: |
         echo "GOPATH=$GITHUB_WORKSPACE" >> $GITHUB_ENV
         echo "PATH=$GITHUB_WORKSPACE/bin:$PATH" >> $GITHUB_ENV
-        echo "GO111MODULE=off" >> $GITHUB_ENV
     - name: Run tests
       run: make race-test
       working-directory: './src/github.com/kevinburke/goose'
