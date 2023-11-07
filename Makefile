@@ -9,10 +9,10 @@ test: lint
 	go test ./...
 
 install:
-	go get -v github.com/kevinburke/goose/...
+	go install -v github.com/kevinburke/goose/...@latest
 
 $(STATICCHECK):
-	go get -u honnef.co/go/tools/cmd/staticcheck
+	go install honnef.co/go/tools/cmd/staticcheck@latest
 
 lint: $(STATICCHECK)
 	go vet ./...
@@ -22,7 +22,7 @@ race-test: lint
 	go test -v -race ./...
 
 $(BUMP_VERSION):
-	go get -u github.com/kevinburke/bump_version
+	go install github.com/kevinburke/bump_version@latest
 
 release: race-test | $(BUMP_VERSION)
 	$(BUMP_VERSION) minor cmd/goose/main.go
