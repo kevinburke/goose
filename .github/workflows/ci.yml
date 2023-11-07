@@ -2,17 +2,13 @@ on: [push, pull_request]
 name: Test
 jobs:
   test:
-    strategy:
-      matrix:
-        go-version: [1.16.x]
-        platform: [ubuntu-latest]
-    runs-on: ${{ matrix.platform }}
+    runs-on: ubuntu-latest
     steps:
     - name: Install Go
       uses: WillAbides/setup-go-faster@main
       with:
-        go-version: ${{ matrix.go-version }}
-    - uses: actions/checkout@v2
+        go-version: 1.21.x
+    - uses: actions/checkout@v4
       with:
          path: './src/github.com/kevinburke/goose'
     # staticcheck needs this for GOPATH
