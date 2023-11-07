@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -84,7 +83,7 @@ func initRun(*Command, ...string) {
 	os.Mkdir(dbDir, 0700)
 	conf := filepath.Join(dbDir, "dbconf.yml")
 	if _, err := os.Stat(conf); os.IsNotExist(err) {
-		if err := ioutil.WriteFile(conf, dbConfTpl, 0600); err != nil {
+		if err := os.WriteFile(conf, dbConfTpl, 0600); err != nil {
 			os.Stderr.WriteString(err.Error())
 			os.Exit(2)
 		}
