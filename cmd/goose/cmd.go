@@ -22,7 +22,7 @@ type Command struct {
 
 func (c *Command) Exec(args []string) {
 	c.Flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, c.Usage+"\n")
+		fmt.Fprintln(os.Stderr, c.Usage)
 		c.Flag.PrintDefaults()
 	}
 	c.Flag.Parse(args)

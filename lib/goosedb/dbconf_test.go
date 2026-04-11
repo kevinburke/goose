@@ -53,7 +53,7 @@ func TestDriverSetFromEnvironmentVariable(t *testing.T) {
 	}
 
 	got := reflect.TypeOf(dbconf.Driver.Dialect)
-	want := reflect.TypeOf(&Sqlite3Dialect{})
+	want := reflect.TypeFor[*Sqlite3Dialect]()
 
 	if got != want {
 		t.Errorf("Not able to read the driver type from environment variable."+

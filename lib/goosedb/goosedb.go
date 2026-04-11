@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 
 	"github.com/kylelemons/go-gypsy/yaml"
-	"github.com/lib/pq"
 )
 
 // DBDriver encapsulates the info needed to work with
@@ -66,14 +65,6 @@ func NewDBConf(p, env string, pgschema string) (*DBConf, error) {
 		return nil, err
 	}
 	open = os.ExpandEnv(open)
-
-	// Automatically parse postgres urls
-	if drv == "postgres" {
-		// Assumption: If we can parse the URL, we should
-		if parsedURL, err := pq.ParseURL(open); err == nil && parsedURL != "" {
-			open = parsedURL
-		}
-	}
 
 	d := newDBDriver(drv, open)
 

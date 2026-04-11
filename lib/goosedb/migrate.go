@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+	"slices"
 	"sort"
 
 	"github.com/kevinburke/goose/lib/goose"
@@ -163,13 +164,7 @@ func EnsureDBVersion(conf *DBConf, db *sql.DB) (int64, error) {
 		}
 
 		// have we already marked this version to be skipped?
-		skip := false
-		for _, v := range toSkip {
-			if v == row.VersionId {
-				skip = true
-				break
-			}
-		}
+		skip := slices.Contains(toSkip, row.VersionId)
 
 		if skip {
 			continue

@@ -87,7 +87,7 @@ func versionFilter(v, current, target int64) bool {
 //
 // The function looks for migration scripts with names in the form:
 //
-//      XXX_descriptivename.ext
+//	XXX_descriptivename.ext
 //
 // where XXX specifies the version number and ext specifies the type of the
 // migration.
@@ -98,12 +98,12 @@ func NumericComponent(name string) (int64, error) {
 		return 0, errors.New("goose: not a recognized migration file type")
 	}
 
-	idx := strings.Index(base, "_")
-	if idx < 0 {
+	before, _, ok := strings.Cut(base, "_")
+	if !ok {
 		return 0, errors.New("goose: no separator found")
 	}
 
-	n, e := strconv.ParseInt(base[:idx], 10, 64)
+	n, e := strconv.ParseInt(before, 10, 64)
 	if e == nil && n <= 0 {
 		return 0, errors.New("goose: migration IDs must be greater than zero")
 	}
