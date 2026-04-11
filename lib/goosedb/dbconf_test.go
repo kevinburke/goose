@@ -1,10 +1,64 @@
 package goosedb
 
 import (
-	"os"
 	"reflect"
 	"testing"
 )
+
+func TestNewConfig(t *testing.T) {
+	dbconf, err := NewConfig("postgres", "user=liam dbname=tester sslmode=disable", "sql/migrations")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	got := []string{dbconf.MigrationsDir, dbconf.Env, dbconf.Driver.Name, dbconf.Driver.OpenStr}
+	want := []string{"sql/migrations", "production", "postgres", "user=liam dbname=tester sslmode=disable"}
+
+	for i, s := range got {
+		if s != want[i] {
+			t.Errorf("Unexpected DBConf value. got %v, want %v", s, want[i])
+		}
+	}
+
+	if reflect.TypeOf(dbconf.Driver.Dialect) != reflect.TypeFor[*PostgresDialect]() {
+		t.Errorf("Unexpected dialect type: got %T", dbconf.Driver.Dialect)
+	}
+}
+
+func TestNewConfigRejectsUnknownDriver(t *testing.T) {
+	_, err := NewConfig("oracle", "ignored", "sql/migrations")
+	if err == nil {
+		t.Fatal("expected error for invalid driver")
+	}
+}
+
+func TestNewConfigCustom(t *testing.T) {
+	driver := DBDriver{
+		Name:    "custom",
+		OpenStr: "dsn",
+		Import:  "github.com/example/customdriver",
+		Dialect: &Sqlite3Dialect{},
+	}
+
+	dbconf, err := NewConfigCustom(driver, "sql/migrations")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if dbconf.Env != "production" {
+		t.Errorf("Unexpected env: got %q want %q", dbconf.Env, "production")
+	}
+	if !reflect.DeepEqual(dbconf.Driver, driver) {
+		t.Errorf("Unexpected driver: got %#v want %#v", dbconf.Driver, driver)
+	}
+}
+
+func TestNewConfigCustomRejectsInvalidDriver(t *testing.T) {
+	_, err := NewConfigCustom(DBDriver{Name: "broken"}, "sql/migrations")
+	if err == nil {
+		t.Fatal("expected error for invalid custom driver")
+	}
+}
 
 func TestBasics(t *testing.T) {
 
@@ -38,14 +92,13 @@ func TestImportOverride(t *testing.T) {
 }
 
 func TestDriverSetFromEnvironmentVariable(t *testing.T) {
-
 	databaseUrlEnvVariableKey := "DB_DRIVER"
 	databaseUrlEnvVariableVal := "sqlite3"
 	databaseOpenStringKey := "DATABASE_URL"
 	databaseOpenStringVal := "db.db"
 
-	os.Setenv(databaseUrlEnvVariableKey, databaseUrlEnvVariableVal)
-	os.Setenv(databaseOpenStringKey, databaseOpenStringVal)
+	t.Setenv(databaseUrlEnvVariableKey, databaseUrlEnvVariableVal)
+	t.Setenv(databaseOpenStringKey, databaseOpenStringVal)
 
 	dbconf, err := NewDBConf("../../db-sample", "environment_variable_config", "")
 	if err != nil {

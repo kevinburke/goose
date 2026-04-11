@@ -181,6 +181,10 @@ You may include as many environments as you like, and you can use the `-env` com
 
 goose will expand environment variables in the `open` element. For an example, see the Heroku section below.
 
+If you are driving migrations from Go code and already have a DSN in memory,
+use `goosedb.NewConfig` or `goosedb.NewConfigCustom` to build a `*goosedb.DBConf`
+without creating a `dbconf.yml` file on disk.
+
 ## Database Drivers
 
 Currently, available dialects are: "postgres", "mysql", or "sqlite3".

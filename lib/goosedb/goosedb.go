@@ -25,6 +25,26 @@ type DBConf struct {
 	PgSchema      string
 }
 
+// NewConfig returns a DBConf for the given driver name, connection string, and
+// migrations directory without reading dbconf.yml from disk.
+func NewConfig(driverName, openStr, migrationsDir string) (*DBConf, error) {
+	return NewConfigCustom(newDBDriver(driverName, openStr), migrationsDir)
+}
+
+// NewConfigCustom returns a DBConf for callers that need to provide a fully
+// populated custom driver configuration.
+func NewConfigCustom(driver DBDriver, migrationsDir string) (*DBConf, error) {
+	if !driver.IsValid() {
+		return nil, fmt.Errorf("goose: invalid driver configuration: %v", driver)
+	}
+
+	return &DBConf{
+		MigrationsDir: migrationsDir,
+		Env:           "production",
+		Driver:        driver,
+	}, nil
+}
+
 // OpenDBFromDBConf wraps database/sql.DB.Open() and configures
 // the newly opened DB based on the given DBConf.
 //
@@ -78,16 +98,13 @@ func NewDBConf(p, env string, pgschema string) (*DBConf, error) {
 		d.Dialect = dialectByName(dialect)
 	}
 
-	if !d.IsValid() {
-		return nil, fmt.Errorf("goose: invalid driver configuration: %v", d)
+	conf, err := NewConfigCustom(d, filepath.Join(p, "migrations"))
+	if err != nil {
+		return nil, err
 	}
-
-	return &DBConf{
-		MigrationsDir: filepath.Join(p, "migrations"),
-		Env:           env,
-		Driver:        d,
-		PgSchema:      pgschema,
-	}, nil
+	conf.Env = env
+	conf.PgSchema = pgschema
+	return conf, nil
 }
 
 // Create a new DBDriver and populate driver specific
