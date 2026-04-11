@@ -102,7 +102,7 @@ func newDBDriver(name, open string) DBDriver {
 
 	switch name {
 	case "postgres":
-		d.Import = "github.com/kevinburke/goose/vendor/github.com/lib/pq"
+		d.Import = "github.com/kevinburke/goose/vendor/github.com/jackc/pgx/v5/stdlib"
 		d.Dialect = &PostgresDialect{}
 
 	case "mymysql":
