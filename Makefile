@@ -40,4 +40,4 @@ $(BUMP_VERSION):
 	go install github.com/kevinburke/bump_version@latest
 
 release: race-test | $(BUMP_VERSION)
-	$(BUMP_VERSION) minor cmd/goose/main.go
+	$(BUMP_VERSION) --tag-prefix=v $(version) lib/goose/version.go

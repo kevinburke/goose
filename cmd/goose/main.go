@@ -8,6 +8,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/kevinburke/goose/lib/goose"
 	"github.com/kevinburke/goose/lib/goosedb"
 )
 
@@ -94,11 +95,8 @@ func helpRun(*Command, ...string) {
 	flag.Usage()
 }
 
-// The version of the goose tool.
-const VERSION = "1.15" // Bump this by running "make release".
-
 func versionRun(*Command, ...string) {
-	fmt.Fprintf(os.Stderr, "goose version %s\n", VERSION)
+	fmt.Fprintf(os.Stderr, "goose version %s\n", goose.Version)
 }
 
 func main() {
