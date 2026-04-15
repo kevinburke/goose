@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -16,6 +17,7 @@ import (
 var flagPath = flag.String("path", "db", "folder containing db info")
 var flagEnv = flag.String("env", "development", "which DB environment to use")
 var flagPgSchema = flag.String("pgschema", "", "which postgres-schema to migrate (default = none)")
+var flagVersion = flag.Bool("version", false, "print goose version")
 
 // helper to create a DBConf from the given flags
 func dbConfFromFlags() (*goosedb.DBConf, error) {
@@ -95,13 +97,21 @@ func helpRun(*Command, ...string) {
 	flag.Usage()
 }
 
+func printVersion(w io.Writer) {
+	fmt.Fprintf(w, "%s\n", goose.Version)
+}
+
 func versionRun(*Command, ...string) {
-	fmt.Fprintf(os.Stderr, "goose version %s\n", goose.Version)
+	printVersion(os.Stdout)
 }
 
 func main() {
 	flag.Usage = usage
 	flag.Parse()
+	if *flagVersion {
+		printVersion(os.Stdout)
+		return
+	}
 
 	args := flag.Args()
 	if len(args) == 0 || args[0] == "-h" {
