@@ -14,3 +14,11 @@ func TestPrintVersion(t *testing.T) {
 		t.Fatalf("printVersion() = %q, want %q", got, want)
 	}
 }
+
+func TestPrintUnknownCommand(t *testing.T) {
+	var buf bytes.Buffer
+	printUnknownCommand(&buf, "wat")
+	if got, want := buf.String(), "error: unknown command \"wat\"\n"; got != want {
+		t.Fatalf("printUnknownCommand() = %q, want %q", got, want)
+	}
+}

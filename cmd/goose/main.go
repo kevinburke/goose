@@ -105,6 +105,10 @@ func versionRun(*Command, ...string) {
 	printVersion(os.Stdout)
 }
 
+func printUnknownCommand(w io.Writer, name string) {
+	fmt.Fprintf(w, "error: unknown command %q\n", name)
+}
+
 func main() {
 	flag.Usage = usage
 	flag.Parse()
@@ -129,7 +133,7 @@ func main() {
 	}
 
 	if cmd == nil {
-		fmt.Printf("error: unknown command %q\n", name)
+		printUnknownCommand(os.Stderr, name)
 		flag.Usage()
 		os.Exit(1)
 	}
