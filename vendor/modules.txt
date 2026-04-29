@@ -32,7 +32,7 @@ github.com/jackc/puddle/v2/internal/genstack
 # github.com/kylelemons/go-gypsy v1.0.0
 ## explicit; go 1.5
 github.com/kylelemons/go-gypsy/yaml
-# github.com/mattn/go-sqlite3 v1.14.42
+# github.com/mattn/go-sqlite3 v1.14.44
 ## explicit; go 1.21
 github.com/mattn/go-sqlite3
 # github.com/ziutek/mymysql v1.5.4
