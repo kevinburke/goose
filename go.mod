@@ -3,7 +3,7 @@ module github.com/kevinburke/goose
 go 1.25.0
 
 require (
-	github.com/go-sql-driver/mysql v1.10.0
+	github.com/go-sql-driver/mysql v1.10.1
 	github.com/jackc/pgx/v5 v5.10.0
 	github.com/kylelemons/go-gypsy v1.0.0
 	github.com/mattn/go-sqlite3 v1.14.50
