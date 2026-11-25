@@ -57,12 +57,25 @@
 //
 // # PostgreSQL Specific Data Types
 //
-// The pgtype package provides support for PostgreSQL specific types. *pgtype.Map.SQLScanner is an adapter that makes
-// these types usable as a sql.Scanner.
+// As of Go 1.27, database/sql allows drivers to implement their own scanning logic by implementing the
+// driver.RowsColumnScanner interface. This allows PostgreSQL types such as arrays to be scanned directly into Go
+// values such as slices.
+//
+//	var a []int64
+//	err := db.QueryRow("select '{1,2,3}'::bigint[]").Scan(&a)
+//
+// In older versions of Go, *pgtype.Map.SQLScanner can be used as an adapter that makes these types usable as a
+// sql.Scanner.
 //
 //	m := pgtype.NewMap()
 //	var a []int64
 //	err := db.QueryRow("select '{1,2,3}'::bigint[]").Scan(m.SQLScanner(&a))
+//
+// The pgtype package provides support for PostgreSQL specific types. These types can be used directly in Go 1.27 and
+// with *pgtype.Map.SQLScanner in older Go versions.
+//
+//	var r pgtype.Range[pgtype.Int4]
+//	err := db.QueryRow("select int4range(1, 5)").Scan(&r)
 package stdlib
 
 import (
@@ -659,6 +672,10 @@ func (r *Rows) ColumnTypeDatabaseTypeName(index int) string {
 
 const varHeaderSize = 4
 
+// noTypeModifier is the type modifier PostgreSQL reports for a column whose type
+// was used without a precision or length specifier.
+const noTypeModifier = -1
+
 // ColumnTypeLength returns the length of the column type if the column is a
 // variable length type. If the column is not a variable length type ok
 // should return false.
@@ -669,25 +686,59 @@ func (r *Rows) ColumnTypeLength(index int) (int64, bool) {
 	case pgtype.TextOID, pgtype.ByteaOID:
 		return math.MaxInt64, true
 	case pgtype.VarcharOID, pgtype.BPCharOID:
+		// An unconstrained varchar or bpchar is not limited, which
+		// database/sql represents as math.MaxInt64.
+		if fd.TypeModifier == -1 {
+			return math.MaxInt64, true
+		}
 		return int64(fd.TypeModifier - varHeaderSize), true
 	case pgtype.VarbitOID:
+		if fd.TypeModifier == -1 {
+			return math.MaxInt64, true
+		}
 		return int64(fd.TypeModifier), true
 	default:
 		return 0, false
 	}
 }
 
-// ColumnTypePrecisionScale should return the precision and scale for decimal
-// types. If not applicable, ok should be false.
+// ColumnTypePrecisionScale returns the precision and scale for numeric types
+// with a declared precision. For timestamp, timestamptz, time, timetz, and interval,
+// it returns a precision of 0 and the fractional seconds precision as the scale,
+// defaulting to 6 when no fractional seconds precision was declared.
+// For unconstrained numeric and other types, ok is false.
 func (r *Rows) ColumnTypePrecisionScale(index int) (precision, scale int64, ok bool) {
 	fd := r.rows.FieldDescriptions()[index]
 
 	switch fd.DataTypeOID {
 	case pgtype.NumericOID:
+		// numeric without a precision specifier accepts any precision and scale,
+		// so there is nothing to report.
+		if fd.TypeModifier == noTypeModifier {
+			return 0, 0, false
+		}
 		mod := fd.TypeModifier - varHeaderSize
 		precision = int64((mod >> 16) & 0xffff)
 		scale = int64(mod & 0xffff)
 		return precision, scale, true
+	case pgtype.TimestampOID, pgtype.TimestamptzOID, pgtype.TimeOID, pgtype.TimetzOID:
+		// The type modifier of these types is their fractional seconds precision:
+		// the number of digits kept after the decimal point, which is the scale.
+		// Numeric precision does not apply to these types, so it is reported as 0.
+		// Without a precision specifier they keep microseconds, the maximum
+		// PostgreSQL supports.
+		if fd.TypeModifier == noTypeModifier {
+			return 0, 6, true
+		}
+		return 0, int64(fd.TypeModifier), true
+	case pgtype.IntervalOID:
+		// An interval's type modifier packs the field range it was declared with in
+		// its high bits and its fractional seconds precision in its low 16 bits,
+		// which are all set when only a range was specified.
+		if fd.TypeModifier == noTypeModifier || fd.TypeModifier&0xffff == 0xffff {
+			return 0, 6, true
+		}
+		return 0, int64(fd.TypeModifier & 0xffff), true
 	default:
 		return 0, 0, false
 	}
@@ -726,7 +777,9 @@ func (r *Rows) Close() error {
 	return r.rows.Err()
 }
 
-func (r *Rows) Next(dest []driver.Value) error {
+// initValueFuncs prepares the database/sql representation of each column. Both
+// Next and ScanColumn use these conversions so their driver.Values agree.
+func (r *Rows) initValueFuncs() {
 	m := r.conn.conn.TypeMap()
 	fieldDescriptions := r.rows.FieldDescriptions()
 
@@ -857,6 +910,10 @@ func (r *Rows) Next(dest []driver.Value) error {
 			}
 		}
 	}
+}
+
+func (r *Rows) Next(dest []driver.Value) error {
+	r.initValueFuncs()
 
 	var more bool
 	if r.skipNext {
